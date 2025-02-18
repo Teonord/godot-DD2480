@@ -34,6 +34,8 @@
 #include "core/math/transform_2d.h"
 #include "core/string/ustring.h"
 
+int rect2_coverage_testing_data_structure[100];
+
 bool Rect2::is_equal_approx(const Rect2 &p_rect) const {
 	return position.is_equal_approx(p_rect.position) && size.is_equal_approx(p_rect.size);
 }

@@ -39,13 +39,7 @@ class String;
 struct Rect2i;
 struct Transform2D;
 
-static int rect2_coverage_testing_data_structure[100];
-
-inline void print_coverage_testing_data_structure(int coverage_array[100]) {
-	for (int i = 0; i < 100; i++) {
-		std::cout << "Path " << i+1 << " was covered " << coverage_array[i] << "times." << std::endl;
-	}
-}
+extern int rect2_coverage_testing_data_structure[100];
 
 struct [[nodiscard]] Rect2 {
 	Point2 position;
