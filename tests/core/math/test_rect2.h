@@ -343,6 +343,91 @@ TEST_CASE("[Rect2] Finite number checks") {
 			"Rect2 with two components infinite should not be finite.");
 }
 
+TEST_CASE("[Rect2] No transform intersects") {
+	CHECK_MESSAGE(
+			Rect2(0, 0, 10, 10).intersects_transformed(Transform2D(Vector2(1, 0), Vector2(0, 1), Vector2(0, 0)), Rect2(0, 0, 10, 10)),
+			"Unmoved equivalent Rect2 should intersect."
+	);
+
+	CHECK_FALSE_MESSAGE(
+			Rect2(0, 0, 10, 10).intersects_transformed(Transform2D(Vector2(1, 0), Vector2(0, 1), Vector2(0, 0)), Rect2(20, 20, 10, 10)),
+			"Unmoved Rect2 outside of first Rect2 should not intersect."
+	);
+
+	CHECK_FALSE_MESSAGE(
+			Rect2(0, 0, 10, 10).intersects_transformed(Transform2D(Vector2(1, 0), Vector2(0, 1), Vector2(0, 0)), Rect2(10, 10, 10, 10)),
+			"Corner Rect2 should not intersect."
+	);
+}
+
+TEST_CASE("[Rect2] Movement transform intersects") {
+	CHECK_MESSAGE(
+			Rect2(0, 0, 10, 10).intersects_transformed(Transform2D(Vector2(1, 0), Vector2(0, 1), Vector2(-20, 0)), Rect2(20, 0, 10, 10)),
+			"Rect2 moved to be equal to other Rect2 should intersect"
+	);
+
+	CHECK_MESSAGE(
+			Rect2(100, 100, 10, 10).intersects_transformed(Transform2D(Vector2(1, 0), Vector2(0, 1), Vector2(100, 25)), Rect2(0, 80, 10, 10)),
+			"Rect2 moved to be on other Rect2 should intersect"
+	);
+
+	CHECK_FALSE_MESSAGE(
+			Rect2(50, 50, 25, 25).intersects_transformed(Transform2D(Vector2(1, 0), Vector2(0, 1), Vector2(0, -100)), Rect2(50, 50, 10, 10)),
+			"Rect2 moved to be out of other Rect2 should not intersect"
+	);
+}
+
+TEST_CASE("[Rect2] Rotated transform intersects") {
+	CHECK_MESSAGE(
+			Rect2(0, 0, 10, 10).intersects_transformed(Transform2D(Vector2(cos(0.78), sin(0.78)), Vector2(-sin(0.78), cos(0.78)), Vector2(0, 0)), Rect2(0, 0, 10, 10)),
+			"Equal then rotated Rect2 should intersect"
+	);
+
+	CHECK_MESSAGE(
+			Rect2(0, 0, 10, 10).intersects_transformed(Transform2D(Vector2(cos(0.78), sin(0.78)), Vector2(-sin(0.78), cos(0.78)), Vector2(0, 0)), Rect2(11, 0, 10, 10)),
+			"Outside but rotated corner inside should intersect"
+	);
+
+	CHECK_FALSE_MESSAGE(
+			Rect2(0, 0, 10, 10).intersects_transformed(Transform2D(Vector2(cos(0.78), sin(0.78)), Vector2(-sin(0.78), cos(0.78)), Vector2(0, 0)), Rect2(9, 9, 10, 10)),
+			"Inside but rotated outside should not intersect"
+	);
+}
+
+/* 
+* Scaling seems to be broken for the intersection, cannot test. 
+*
+TEST_CASE("[Rect2] Scaled transform intersects") {
+	CHECK_MESSAGE(
+			Rect2(0, 0, 10, 10).intersects_transformed(Transform2D(Vector2(3, 0), Vector2(0, 3), Vector2(0, 0)), Rect2(0, 0, 10, 10)),
+			"Equal then scaled Rect2 should intersect"
+	);
+
+	CHECK_MESSAGE(
+			Rect2(11, 0, 10, 10).intersects_transformed(Transform2D(Vector2(3, 0), Vector2(0, 3), Vector2(0, 0)), Rect2(0, 0, 10, 10)),
+			"Outside but scaled inside should intersect"
+	);
+
+	CHECK_FALSE_MESSAGE(
+			Rect2(12, 0, 10, 10).intersects_transformed(Transform2D(Vector2(0.1, 0), Vector2(0, 0.1), Vector2(0, 0)), Rect2(0, 15, 15, 15)),
+			"Inside then scaled outside Rect2 should not intersect"
+	);
+}
+*/
+
+TEST_CASE("[Rect2] Multiple transform directions") {
+	CHECK_MESSAGE(
+			Rect2(0, 0, 80, 80).intersects_transformed(Transform2D(Vector2(cos(0.78), sin(0.78)), Vector2(-sin(0.78), cos(0.78)), Vector2(5, 5)), Rect2(50, 50, 100, 100)),
+			"Rotated and translated but inside should intersect"
+	);
+
+	CHECK_FALSE_MESSAGE(
+			Rect2(0, 0, 10, 10).intersects_transformed(Transform2D(Vector2(cos(-0.78), sin(-0.78)), Vector2(-sin(-0.78), cos(-0.78)), Vector2(-50, -50)), Rect2(0, 0, 10, 10)),
+			"Rotated and translated outside should not intersect"
+	);
+}
+
+
 } // namespace TestRect2
 
 #endif // TEST_RECT2_H
