@@ -158,101 +158,146 @@ String Performance::get_monitor_name(Monitor p_monitor) const {
 }
 
 double Performance::get_monitor(Monitor p_monitor) const {
-	switch (p_monitor) {
-		case TIME_FPS:
-			return Engine::get_singleton()->get_frames_per_second();
-		case TIME_PROCESS:
-			return _process_time;
-		case TIME_PHYSICS_PROCESS:
-			return _physics_process_time;
-		case TIME_NAVIGATION_PROCESS:
-			return _navigation_process_time;
-		case MEMORY_STATIC:
-			return Memory::get_mem_usage();
-		case MEMORY_STATIC_MAX:
-			return Memory::get_mem_max_usage();
-		case MEMORY_MESSAGE_BUFFER_MAX:
-			return MessageQueue::get_singleton()->get_max_buffer_usage();
-		case OBJECT_COUNT:
-			return ObjectDB::get_object_count();
-		case OBJECT_RESOURCE_COUNT:
-			return ResourceCache::get_cached_resource_count();
-		case OBJECT_NODE_COUNT:
-			return _get_node_count();
-		case OBJECT_ORPHAN_NODE_COUNT:
-			return Node::orphan_node_count;
-		case RENDER_TOTAL_OBJECTS_IN_FRAME:
-			return RS::get_singleton()->get_rendering_info(RS::RENDERING_INFO_TOTAL_OBJECTS_IN_FRAME);
-		case RENDER_TOTAL_PRIMITIVES_IN_FRAME:
-			return RS::get_singleton()->get_rendering_info(RS::RENDERING_INFO_TOTAL_PRIMITIVES_IN_FRAME);
-		case RENDER_TOTAL_DRAW_CALLS_IN_FRAME:
-			return RS::get_singleton()->get_rendering_info(RS::RENDERING_INFO_TOTAL_DRAW_CALLS_IN_FRAME);
-		case RENDER_VIDEO_MEM_USED:
-			return RS::get_singleton()->get_rendering_info(RS::RENDERING_INFO_VIDEO_MEM_USED);
-		case RENDER_TEXTURE_MEM_USED:
-			return RS::get_singleton()->get_rendering_info(RS::RENDERING_INFO_TEXTURE_MEM_USED);
-		case RENDER_BUFFER_MEM_USED:
-			return RS::get_singleton()->get_rendering_info(RS::RENDERING_INFO_BUFFER_MEM_USED);
-		case PIPELINE_COMPILATIONS_CANVAS:
-			return RS::get_singleton()->get_rendering_info(RS::RENDERING_INFO_PIPELINE_COMPILATIONS_CANVAS);
-		case PIPELINE_COMPILATIONS_MESH:
-			return RS::get_singleton()->get_rendering_info(RS::RENDERING_INFO_PIPELINE_COMPILATIONS_MESH);
-		case PIPELINE_COMPILATIONS_SURFACE:
-			return RS::get_singleton()->get_rendering_info(RS::RENDERING_INFO_PIPELINE_COMPILATIONS_SURFACE);
-		case PIPELINE_COMPILATIONS_DRAW:
-			return RS::get_singleton()->get_rendering_info(RS::RENDERING_INFO_PIPELINE_COMPILATIONS_DRAW);
-		case PIPELINE_COMPILATIONS_SPECIALIZATION:
-			return RS::get_singleton()->get_rendering_info(RS::RENDERING_INFO_PIPELINE_COMPILATIONS_SPECIALIZATION);
-		case PHYSICS_2D_ACTIVE_OBJECTS:
-			return PhysicsServer2D::get_singleton()->get_process_info(PhysicsServer2D::INFO_ACTIVE_OBJECTS);
-		case PHYSICS_2D_COLLISION_PAIRS:
-			return PhysicsServer2D::get_singleton()->get_process_info(PhysicsServer2D::INFO_COLLISION_PAIRS);
-		case PHYSICS_2D_ISLAND_COUNT:
-			return PhysicsServer2D::get_singleton()->get_process_info(PhysicsServer2D::INFO_ISLAND_COUNT);
-#ifdef _3D_DISABLED
-		case PHYSICS_3D_ACTIVE_OBJECTS:
-			return 0;
-		case PHYSICS_3D_COLLISION_PAIRS:
-			return 0;
-		case PHYSICS_3D_ISLAND_COUNT:
-			return 0;
-#else
-		case PHYSICS_3D_ACTIVE_OBJECTS:
-			return PhysicsServer3D::get_singleton()->get_process_info(PhysicsServer3D::INFO_ACTIVE_OBJECTS);
-		case PHYSICS_3D_COLLISION_PAIRS:
-			return PhysicsServer3D::get_singleton()->get_process_info(PhysicsServer3D::INFO_COLLISION_PAIRS);
-		case PHYSICS_3D_ISLAND_COUNT:
-			return PhysicsServer3D::get_singleton()->get_process_info(PhysicsServer3D::INFO_ISLAND_COUNT);
-#endif // _3D_DISABLED
+    if (is_time_monitor(p_monitor)) {
+        return get_time_monitor(p_monitor);
+    } else if (is_memory_monitor(p_monitor)) {
+        return get_memory_monitor(p_monitor);
+    } else if (is_object_monitor(p_monitor)) {
+        return get_object_monitor(p_monitor);
+    } else if (is_render_monitor(p_monitor)) {
+        return get_render_monitor(p_monitor);
+    } else if (is_physics_monitor(p_monitor)) {
+        return get_physics_monitor(p_monitor);
+    } else if (is_navigation_monitor(p_monitor)) {
+        return get_navigation_monitor(p_monitor);
+    } else if (p_monitor == AUDIO_OUTPUT_LATENCY) {
+        return AudioServer::get_singleton()->get_output_latency();
+    }
+    return 0;
+}
 
-		case AUDIO_OUTPUT_LATENCY:
-			return AudioServer::get_singleton()->get_output_latency();
-		case NAVIGATION_ACTIVE_MAPS:
-			return NavigationServer3D::get_singleton()->get_process_info(NavigationServer3D::INFO_ACTIVE_MAPS);
-		case NAVIGATION_REGION_COUNT:
-			return NavigationServer3D::get_singleton()->get_process_info(NavigationServer3D::INFO_REGION_COUNT);
-		case NAVIGATION_AGENT_COUNT:
-			return NavigationServer3D::get_singleton()->get_process_info(NavigationServer3D::INFO_AGENT_COUNT);
-		case NAVIGATION_LINK_COUNT:
-			return NavigationServer3D::get_singleton()->get_process_info(NavigationServer3D::INFO_LINK_COUNT);
-		case NAVIGATION_POLYGON_COUNT:
-			return NavigationServer3D::get_singleton()->get_process_info(NavigationServer3D::INFO_POLYGON_COUNT);
-		case NAVIGATION_EDGE_COUNT:
-			return NavigationServer3D::get_singleton()->get_process_info(NavigationServer3D::INFO_EDGE_COUNT);
-		case NAVIGATION_EDGE_MERGE_COUNT:
-			return NavigationServer3D::get_singleton()->get_process_info(NavigationServer3D::INFO_EDGE_MERGE_COUNT);
-		case NAVIGATION_EDGE_CONNECTION_COUNT:
-			return NavigationServer3D::get_singleton()->get_process_info(NavigationServer3D::INFO_EDGE_CONNECTION_COUNT);
-		case NAVIGATION_EDGE_FREE_COUNT:
-			return NavigationServer3D::get_singleton()->get_process_info(NavigationServer3D::INFO_EDGE_FREE_COUNT);
-		case NAVIGATION_OBSTACLE_COUNT:
-			return NavigationServer3D::get_singleton()->get_process_info(NavigationServer3D::INFO_OBSTACLE_COUNT);
+double Performance::get_time_monitor(Monitor p_monitor) const {
+    switch (p_monitor) {
+        case TIME_FPS:
+            return Engine::get_singleton()->get_frames_per_second();
+        case TIME_PROCESS:
+            return _process_time;
+        case TIME_PHYSICS_PROCESS:
+            return _physics_process_time;
+        case TIME_NAVIGATION_PROCESS:
+            return _navigation_process_time;
+        default:
+            return 0;
+    }
+}
 
-		default: {
-		}
-	}
+bool Performance::is_time_monitor(Monitor p_monitor) const {
+    return (p_monitor >= TIME_FPS && p_monitor <= TIME_NAVIGATION_PROCESS);
+}
 
-	return 0;
+double Performance::get_memory_monitor(Monitor p_monitor) const {
+    switch (p_monitor) {
+        case MEMORY_STATIC:
+            return Memory::get_mem_usage();
+        case MEMORY_STATIC_MAX:
+            return Memory::get_mem_max_usage();
+        case MEMORY_MESSAGE_BUFFER_MAX:
+            return MessageQueue::get_singleton()->get_max_buffer_usage();
+        default:
+            return 0;
+    }
+}
+
+bool Performance::is_memory_monitor(Monitor p_monitor) const {
+    return (p_monitor >= MEMORY_STATIC && p_monitor <= MEMORY_MESSAGE_BUFFER_MAX);
+}
+
+double Performance::get_object_monitor(Monitor p_monitor) const {
+    switch (p_monitor) {
+        case OBJECT_COUNT:
+            return ObjectDB::get_object_count();
+        case OBJECT_RESOURCE_COUNT:
+            return ResourceCache::get_cached_resource_count();
+        case OBJECT_NODE_COUNT:
+            return _get_node_count();
+        case OBJECT_ORPHAN_NODE_COUNT:
+            return Node::orphan_node_count;
+        default:
+            return 0;
+    }
+}
+
+bool Performance::is_object_monitor(Monitor p_monitor) const {
+    return (p_monitor >= OBJECT_COUNT && p_monitor <= OBJECT_ORPHAN_NODE_COUNT);
+}
+
+double Performance::get_render_monitor(Monitor p_monitor) const {
+    switch (p_monitor) {
+        case RENDER_TOTAL_OBJECTS_IN_FRAME:
+            return RS::get_singleton()->get_rendering_info(RS::RENDERING_INFO_TOTAL_OBJECTS_IN_FRAME);
+        case RENDER_TOTAL_PRIMITIVES_IN_FRAME:
+            return RS::get_singleton()->get_rendering_info(RS::RENDERING_INFO_TOTAL_PRIMITIVES_IN_FRAME);
+        case RENDER_TOTAL_DRAW_CALLS_IN_FRAME:
+            return RS::get_singleton()->get_rendering_info(RS::RENDERING_INFO_TOTAL_DRAW_CALLS_IN_FRAME);
+        case RENDER_VIDEO_MEM_USED:
+            return RS::get_singleton()->get_rendering_info(RS::RENDERING_INFO_VIDEO_MEM_USED);
+        case RENDER_TEXTURE_MEM_USED:
+            return RS::get_singleton()->get_rendering_info(RS::RENDERING_INFO_TEXTURE_MEM_USED);
+        case RENDER_BUFFER_MEM_USED:
+            return RS::get_singleton()->get_rendering_info(RS::RENDERING_INFO_BUFFER_MEM_USED);
+        default:
+            return 0;
+    }
+}
+
+bool Performance::is_render_monitor(Monitor p_monitor) const {
+    return (p_monitor >= RENDER_TOTAL_OBJECTS_IN_FRAME && p_monitor <= RENDER_BUFFER_MEM_USED);
+}
+
+double Performance::get_physics_monitor(Monitor p_monitor) const {
+    switch (p_monitor) {
+        case PHYSICS_2D_ACTIVE_OBJECTS:
+            return PhysicsServer2D::get_singleton()->get_process_info(PhysicsServer2D::INFO_ACTIVE_OBJECTS);
+        case PHYSICS_2D_COLLISION_PAIRS:
+            return PhysicsServer2D::get_singleton()->get_process_info(PhysicsServer2D::INFO_COLLISION_PAIRS);
+        case PHYSICS_2D_ISLAND_COUNT:
+            return PhysicsServer2D::get_singleton()->get_process_info(PhysicsServer2D::INFO_ISLAND_COUNT);
+#ifndef _3D_DISABLED
+        case PHYSICS_3D_ACTIVE_OBJECTS:
+            return PhysicsServer3D::get_singleton()->get_process_info(PhysicsServer3D::INFO_ACTIVE_OBJECTS);
+        case PHYSICS_3D_COLLISION_PAIRS:
+            return PhysicsServer3D::get_singleton()->get_process_info(PhysicsServer3D::INFO_COLLISION_PAIRS);
+        case PHYSICS_3D_ISLAND_COUNT:
+            return PhysicsServer3D::get_singleton()->get_process_info(PhysicsServer3D::INFO_ISLAND_COUNT);
+#endif
+        default:
+            return 0;
+    }
+}
+
+bool Performance::is_physics_monitor(Monitor p_monitor) const {
+    return (p_monitor >= PHYSICS_2D_ACTIVE_OBJECTS && p_monitor <= PHYSICS_3D_ISLAND_COUNT);
+}
+
+double Performance::get_navigation_monitor(Monitor p_monitor) const {
+    switch (p_monitor) {
+        case NAVIGATION_ACTIVE_MAPS:
+            return NavigationServer3D::get_singleton()->get_process_info(NavigationServer3D::INFO_ACTIVE_MAPS);
+        case NAVIGATION_REGION_COUNT:
+            return NavigationServer3D::get_singleton()->get_process_info(NavigationServer3D::INFO_REGION_COUNT);
+        case NAVIGATION_AGENT_COUNT:
+            return NavigationServer3D::get_singleton()->get_process_info(NavigationServer3D::INFO_AGENT_COUNT);
+        case NAVIGATION_LINK_COUNT:
+            return NavigationServer3D::get_singleton()->get_process_info(NavigationServer3D::INFO_LINK_COUNT);
+        case NAVIGATION_POLYGON_COUNT:
+            return NavigationServer3D::get_singleton()->get_process_info(NavigationServer3D::INFO_POLYGON_COUNT);
+        default:
+            return 0;
+    }
+}
+
+bool Performance::is_navigation_monitor(Monitor p_monitor) const {
+    return (p_monitor >= NAVIGATION_ACTIVE_MAPS && p_monitor <= NAVIGATION_POLYGON_COUNT);
 }
 
 Performance::MonitorType Performance::get_monitor_type(Monitor p_monitor) const {
