@@ -271,6 +271,7 @@ int test_main(int argc, char *argv[]) {
 	int res = test_context.run();
 
 	print_coverage_testing_data_structure(rect2_coverage_testing_data_structure);
+	print_coverage_testing_data_structure(basis_coverage_testing_data_structure);
 
 	return res;
 }
