@@ -54,130 +54,130 @@ void Geometry3D::get_closest_points_between_segments(const Vector3 &p_p0, const 
 		real_t bte = b * e;
 		real_t ctd = c * d;
 
-        geometry_3d_coverage_testing_data_structure[0];
+        geometry_3d_coverage_testing_data_structure[0]++;
 
 		if (bte <= ctd) {
-            geometry_3d_coverage_testing_data_structure[1];
+            geometry_3d_coverage_testing_data_structure[1]++;
 			// s <= 0.0f
 			if (e <= 0.0f) {
-                geometry_3d_coverage_testing_data_structure[2];
+                geometry_3d_coverage_testing_data_structure[2]++;
 				// t <= 0.0f
                 if(-d >= a){
-                    geometry_3d_coverage_testing_data_structure[3];
+                    geometry_3d_coverage_testing_data_structure[3]++;
                     s = 1;
                 } else if (-d > 0.0f){
-                    geometry_3d_coverage_testing_data_structure[4];
+                    geometry_3d_coverage_testing_data_structure[4]++;
                     s = -d/a;
                 } else {
-                    geometry_3d_coverage_testing_data_structure[5];
+                    geometry_3d_coverage_testing_data_structure[5]++;
                     s = 0.0f;
                 }
 				t = 0.0f;
 			} else if (e < c) {
-                geometry_3d_coverage_testing_data_structure[6];
+                geometry_3d_coverage_testing_data_structure[6]++;
 				// 0.0f < t < 1
 				s = 0.0f;
 				t = e / c;
 			} else {
-                geometry_3d_coverage_testing_data_structure[7];
+                geometry_3d_coverage_testing_data_structure[7]++;
 				// t >= 1
 				//s = (b - d >= a ? 1 : (b - d > 0.0f ? (b - d) / a : 0.0f));
                 if (b - d >= a) {
-                    geometry_3d_coverage_testing_data_structure[8];
+                    geometry_3d_coverage_testing_data_structure[8]++;
                     s = 1;
                 } else if (b - d > 0.0f) {
-                    geometry_3d_coverage_testing_data_structure[9];
+                    geometry_3d_coverage_testing_data_structure[9]++;
                     s = (b - d) / a;
                 } else {
-                    geometry_3d_coverage_testing_data_structure[10];
+                    geometry_3d_coverage_testing_data_structure[10]++;
                     s = 0.0f;
                 }
 				t = 1;
 			}
 		} else {
-            geometry_3d_coverage_testing_data_structure[11];
+            geometry_3d_coverage_testing_data_structure[11]++;
 			// s > 0.0f
 			s = bte - ctd;
 			if (s >= det) {
-                geometry_3d_coverage_testing_data_structure[12];
+                geometry_3d_coverage_testing_data_structure[12]++;
 				// s >= 1
 				if (b + e <= 0.0f) {
-                    geometry_3d_coverage_testing_data_structure[13];
+                    geometry_3d_coverage_testing_data_structure[13]++;
 					// t <= 0.0f
 					//s = (-d <= 0.0f ? 0.0f : (-d < a ? -d / a : 1));
                     if (-d <= 0.0f) {
-                        geometry_3d_coverage_testing_data_structure[14];
+                        geometry_3d_coverage_testing_data_structure[14]++;
                         s = 0.0f;
                     } else if (-d < a) {
-                        geometry_3d_coverage_testing_data_structure[15];
+                        geometry_3d_coverage_testing_data_structure[15]++;
                         s = -d / a;
                     } else {
-                        geometry_3d_coverage_testing_data_structure[16];
+                        geometry_3d_coverage_testing_data_structure[16]++;
                         s = 1;
                     }
 					t = 0.0f;
 				} else if (b + e < c) {
-                    geometry_3d_coverage_testing_data_structure[17];
+                    geometry_3d_coverage_testing_data_structure[17]++;
 					// 0.0f < t < 1
 					s = 1;
 					t = (b + e) / c;
 				} else {
-                    geometry_3d_coverage_testing_data_structure[18];
+                    geometry_3d_coverage_testing_data_structure[18]++;
 					// t >= 1
 					//s = (b - d <= 0.0f ? 0.0f : (b - d < a ? (b - d) / a : 1));
                     if (b - d <= 0.0f) {
-                        geometry_3d_coverage_testing_data_structure[19];
+                        geometry_3d_coverage_testing_data_structure[19]++;
                         s = 0.0f;
                     } else if (b - d < a) {
-                        geometry_3d_coverage_testing_data_structure[20];
+                        geometry_3d_coverage_testing_data_structure[20]++;
                         s = (b - d) / a;
                     } else {
-                        geometry_3d_coverage_testing_data_structure[21];
+                        geometry_3d_coverage_testing_data_structure[21]++;
                         s = 1;
                     }
 					t = 1;
 				}
 			} else {
-                geometry_3d_coverage_testing_data_structure[22];
+                geometry_3d_coverage_testing_data_structure[22]++;
 				// 0.0f < s < 1
 				real_t ate = a * e;
 				real_t btd = b * d;
 
 				if (ate <= btd) {
-                    geometry_3d_coverage_testing_data_structure[23];
+                    geometry_3d_coverage_testing_data_structure[23]++;
 					// t <= 0.0f
 					//s = (-d <= 0.0f ? 0.0f : (-d >= a ? 1 : -d / a));
                     if (-d <= 0.0f) {
-                        geometry_3d_coverage_testing_data_structure[24];
+                        geometry_3d_coverage_testing_data_structure[24]++;
                         s = 0.0f;
                     } else if (-d >= a) {
-                        geometry_3d_coverage_testing_data_structure[25];
+                        geometry_3d_coverage_testing_data_structure[25]++;
                         s = 1;
                     } else {
-                        geometry_3d_coverage_testing_data_structure[26];
+                        geometry_3d_coverage_testing_data_structure[26]++;
                         s = -d / a;
                     }
 					t = 0.0f;
 				} else {
-                    geometry_3d_coverage_testing_data_structure[27];
+                    geometry_3d_coverage_testing_data_structure[27]++;
 					// t > 0.0f
 					t = ate - btd;
 					if (t >= det) {
-                        geometry_3d_coverage_testing_data_structure[28];
+                        geometry_3d_coverage_testing_data_structure[28]++;
 						// t >= 1
 						if(b - d <= 0.0f) {
-                            geometry_3d_coverage_testing_data_structure[29];
+                            geometry_3d_coverage_testing_data_structure[29]++;
                             s = 0.0f;
                         } else if (b - d >= a) {
-                            geometry_3d_coverage_testing_data_structure[30];
+                            geometry_3d_coverage_testing_data_structure[30]++;
                             s = 1;
                         } else {
-                            geometry_3d_coverage_testing_data_structure[31];
+                            geometry_3d_coverage_testing_data_structure[31]++;
                             s = (b - d) / a;
                         }
 						t = 1;
 					} else {
-                        geometry_3d_coverage_testing_data_structure[32];
+                        geometry_3d_coverage_testing_data_structure[32]++;
 						// 0.0f < t < 1
 						s /= det;
 						t /= det;
@@ -187,35 +187,35 @@ void Geometry3D::get_closest_points_between_segments(const Vector3 &p_p0, const 
 		}
 	} else {
 		// Parallel segments
-        geometry_3d_coverage_testing_data_structure[33];
+        geometry_3d_coverage_testing_data_structure[33]++;
 		if (e <= 0.0f) {
-            geometry_3d_coverage_testing_data_structure[34];
+            geometry_3d_coverage_testing_data_structure[34]++;
 			if (-d <= 0.0f) {
-                geometry_3d_coverage_testing_data_structure[35];
+                geometry_3d_coverage_testing_data_structure[35]++;
                 s = 0.0f;
             } else if (-d >= a) {
-                geometry_3d_coverage_testing_data_structure[36];
+                geometry_3d_coverage_testing_data_structure[36]++;
                 s = 1;
             } else {
-                geometry_3d_coverage_testing_data_structure[37];
+                geometry_3d_coverage_testing_data_structure[37]++;
                 s = -d / a;
             }
 			t = 0.0f;
 		} else if (e >= c) {
-            geometry_3d_coverage_testing_data_structure[38];
+            geometry_3d_coverage_testing_data_structure[38]++;
 			if (b - d <= 0.0f) {
-                geometry_3d_coverage_testing_data_structure[39];
+                geometry_3d_coverage_testing_data_structure[39]++;
                 s = 0.0f;
             } else if (b - d >= a) {
-                geometry_3d_coverage_testing_data_structure[40];
+                geometry_3d_coverage_testing_data_structure[40]++;
                 s = 1;
             } else {
-                geometry_3d_coverage_testing_data_structure[41];
+                geometry_3d_coverage_testing_data_structure[41]++;
                 s = (b - d) / a;
             }
 			t = 1;
 		} else {
-            geometry_3d_coverage_testing_data_structure[42];
+            geometry_3d_coverage_testing_data_structure[42]++;
 			s = 0.0f;
 			t = e / c;
 		}
