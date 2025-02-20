@@ -30,6 +30,8 @@
 
 #include "geometry_3d.h"
 
+int geometry_3d_coverage_testing_data_structure[100];
+
 void Geometry3D::get_closest_points_between_segments(const Vector3 &p_p0, const Vector3 &p_p1, const Vector3 &p_q0, const Vector3 &p_q1, Vector3 &r_ps, Vector3 &r_qt) {
 	// Based on David Eberly's Computation of Distance Between Line Segments algorithm.
 
@@ -56,7 +58,13 @@ void Geometry3D::get_closest_points_between_segments(const Vector3 &p_p0, const 
 			// s <= 0.0f
 			if (e <= 0.0f) {
 				// t <= 0.0f
-				s = (-d >= a ? 1 : (-d > 0.0f ? -d / a : 0.0f));
+                if(-d >= a){
+                    s = 1;
+                } else if (-d > 0.0f){
+                    s = -d/a;
+                } else {
+                    s = 0.0f;
+                }
 				t = 0.0f;
 			} else if (e < c) {
 				// 0.0f < t < 1
@@ -64,7 +72,14 @@ void Geometry3D::get_closest_points_between_segments(const Vector3 &p_p0, const 
 				t = e / c;
 			} else {
 				// t >= 1
-				s = (b - d >= a ? 1 : (b - d > 0.0f ? (b - d) / a : 0.0f));
+				//s = (b - d >= a ? 1 : (b - d > 0.0f ? (b - d) / a : 0.0f));
+                if (b - d >= a) {
+                    s = 1;
+                } else if (b - d > 0.0f) {
+                    s = (b - d) / a;
+                } else {
+                    s = 0.0f;
+                }
 				t = 1;
 			}
 		} else {
@@ -74,7 +89,14 @@ void Geometry3D::get_closest_points_between_segments(const Vector3 &p_p0, const 
 				// s >= 1
 				if (b + e <= 0.0f) {
 					// t <= 0.0f
-					s = (-d <= 0.0f ? 0.0f : (-d < a ? -d / a : 1));
+					//s = (-d <= 0.0f ? 0.0f : (-d < a ? -d / a : 1));
+                    if (-d <= 0.0f) {
+                        s = 0.0f;
+                    } else if (-d < a) {
+                        s = -d / a;
+                    } else {
+                        s = 1;
+                    }
 					t = 0.0f;
 				} else if (b + e < c) {
 					// 0.0f < t < 1
@@ -82,7 +104,14 @@ void Geometry3D::get_closest_points_between_segments(const Vector3 &p_p0, const 
 					t = (b + e) / c;
 				} else {
 					// t >= 1
-					s = (b - d <= 0.0f ? 0.0f : (b - d < a ? (b - d) / a : 1));
+					//s = (b - d <= 0.0f ? 0.0f : (b - d < a ? (b - d) / a : 1));
+                    if (b - d <= 0.0f) {
+                        s = 0.0f;
+                    } else if (b - d < a) {
+                        s = (b - d) / a;
+                    } else {
+                        s = 1;
+                    }
 					t = 1;
 				}
 			} else {
@@ -92,14 +121,27 @@ void Geometry3D::get_closest_points_between_segments(const Vector3 &p_p0, const 
 
 				if (ate <= btd) {
 					// t <= 0.0f
-					s = (-d <= 0.0f ? 0.0f : (-d >= a ? 1 : -d / a));
+					//s = (-d <= 0.0f ? 0.0f : (-d >= a ? 1 : -d / a));
+                    if (-d <= 0.0f) {
+                        s = 0.0f;
+                    } else if (-d >= a) {
+                        s = 1;
+                    } else {
+                        s = -d / a;
+                    }
 					t = 0.0f;
 				} else {
 					// t > 0.0f
 					t = ate - btd;
 					if (t >= det) {
 						// t >= 1
-						s = (b - d <= 0.0f ? 0.0f : (b - d >= a ? 1 : (b - d) / a));
+						if(b - d <= 0.0f) {
+                            s = 0.0f;
+                        } else if (b - d >= a) {
+                            s = 1;
+                        } else {
+                            s = (b - d) / a;
+                        }
 						t = 1;
 					} else {
 						// 0.0f < t < 1
@@ -112,7 +154,13 @@ void Geometry3D::get_closest_points_between_segments(const Vector3 &p_p0, const 
 	} else {
 		// Parallel segments
 		if (e <= 0.0f) {
-			s = (-d <= 0.0f ? 0.0f : (-d >= a ? 1 : -d / a));
+			if (-d <= 0.0f) {
+                s = 0.0f;
+            } else if (-d >= a) {
+                s = 1;
+            } else {
+                s = -d / a;
+            }
 			t = 0.0f;
 		} else if (e >= c) {
 			s = (b - d <= 0.0f ? 0.0f : (b - d >= a ? 1 : (b - d) / a));
@@ -125,6 +173,13 @@ void Geometry3D::get_closest_points_between_segments(const Vector3 &p_p0, const 
 
 	r_ps = (1 - s) * p_p0 + s * p_p1;
 	r_qt = (1 - t) * p_q0 + t * p_q1;
+}
+
+real_t Geometry3D::clamp(real_t val, real_t min, real_t max){
+    //could use ternary as in the original, but prefer if else since it is easier to understand whats going on.
+    if(val < min) return min;
+    else if (val > max) return max;
+    else return val;
 }
 
 real_t Geometry3D::get_closest_distance_between_segments(const Vector3 &p_p0, const Vector3 &p_p1, const Vector3 &p_q0, const Vector3 &p_q1) {
