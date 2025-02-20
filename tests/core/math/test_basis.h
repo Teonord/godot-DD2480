@@ -426,6 +426,45 @@ TEST_CASE("[Basis] Is rotation checks") {
 			"Edge case: Basis with all zeroes should return false for is_rotation, because it is not just a rotation (has a scale of 0).");
 }
 
+TEST_CASE("Basis::get_euler - Invalid EulerOrder (Out of Range Integer)") {
+    Basis basis;
+    EulerOrder invalid_order = static_cast<EulerOrder>(9999); // Out-of-range enum value
+
+    Vector3 result = basis.get_euler(invalid_order);
+    
+    REQUIRE(result == Vector3());
+}
+
+TEST_CASE("Basis::get_euler - Uninitialized EulerOrder") {
+    Basis basis;
+    EulerOrder uninitialized_order; // Uninitialized value (garbage memory)
+
+    Vector3 result = basis.get_euler(uninitialized_order);
+
+    REQUIRE(result == Vector3());
+}
+
+TEST_CASE("Basis::get_euler - Corrupt Memory (Invalid Pointer)") {
+    Basis basis;
+    EulerOrder* invalid_ptr = nullptr;
+
+    REQUIRE_THROWS(basis.get_euler(*invalid_ptr));
+}
+
+TEST_CASE("Basis::get_euler - Bitwise Corrupted EulerOrder") {
+    Basis basis;
+    
+    // Create a valid EulerOrder
+    EulerOrder valid_order = EulerOrder::XYZ;
+
+    // Corrupt it by flipping random bits
+    EulerOrder corrupted_order = static_cast<EulerOrder>(static_cast<int>(valid_order) ^ 0xFF);
+
+    Vector3 result = basis.get_euler(corrupted_order);
+
+    REQUIRE(result == Vector3()); 
+}
+
 } // namespace TestBasis
 
 #endif // TEST_BASIS_H
