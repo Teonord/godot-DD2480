@@ -34,6 +34,8 @@
 #include "core/math/quaternion.h"
 #include "core/math/vector3.h"
 
+extern int basis_coverage_testing_data_structure[100];
+
 struct [[nodiscard]] Basis {
 	Vector3 rows[3] = {
 		Vector3(1, 0, 0),
@@ -77,7 +79,6 @@ struct [[nodiscard]] Basis {
 
 	Vector3 rotref_posscale_decomposition(Basis &rotref) const;
 
-	extern int basis_coverage_testing_data_structure[100];
 	Vector3 get_euler(EulerOrder p_order = EulerOrder::YXZ) const;
 	void set_euler(const Vector3 &p_euler, EulerOrder p_order = EulerOrder::YXZ);
 	static Basis from_euler(const Vector3 &p_euler, EulerOrder p_order = EulerOrder::YXZ) {
