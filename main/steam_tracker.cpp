@@ -35,60 +35,66 @@
 // https://partner.steamgames.com/doc/sdk/api#initialization_and_shutdown
 
 SteamTracker::SteamTracker() {
-	String path;
-	if (OS::get_singleton()->has_feature("linuxbsd")) {
-		path = OS::get_singleton()->get_executable_path().get_base_dir().path_join("libsteam_api.so");
-		if (!FileAccess::exists(path)) {
-			path = OS::get_singleton()->get_executable_path().get_base_dir().path_join("../lib").path_join("libsteam_api.so");
-			if (!FileAccess::exists(path)) {
-				return;
-			}
-		}
-	} else if (OS::get_singleton()->has_feature("windows")) {
-		if (OS::get_singleton()->has_feature("64")) {
-			path = OS::get_singleton()->get_executable_path().get_base_dir().path_join("steam_api64.dll");
-		} else {
-			path = OS::get_singleton()->get_executable_path().get_base_dir().path_join("steam_api.dll");
-		}
-		if (!FileAccess::exists(path)) {
-			return;
-		}
-	} else if (OS::get_singleton()->has_feature("macos")) {
-		path = OS::get_singleton()->get_executable_path().get_base_dir().path_join("libsteam_api.dylib");
-		if (!FileAccess::exists(path)) {
-			path = OS::get_singleton()->get_executable_path().get_base_dir().path_join("../Frameworks").path_join("libsteam_api.dylib");
-			if (!FileAccess::exists(path)) {
-				return;
-			}
-		}
-	} else {
+	String path = get_steam_library_path();
+	if (path.is_empty()) {
 		return;
 	}
 
+	if (!load_steam_library(path)) {
+		return;
+	}
+
+	initialize_steam_api();
+}
+
+String SteamTracker::get_steam_library_path() {
+	String path;
+	String base_dir = OS::get_singleton()->get_executable_path().get_base_dir();
+
+	if (OS::get_singleton()->has_feature("linuxbsd")) {
+		path = find_existing_path({ base_dir.path_join("libsteam_api.so"),
+			base_dir.path_join("../lib/libsteam_api.so") });
+	} else if (OS::get_singleton()->has_feature("windows")) {
+		path = find_existing_path({ base_dir.path_join(OS::get_singleton()->has_feature("64") ? "steam_api64.dll" : "steam_api.dll") });
+	} else if (OS::get_singleton()->has_feature("macos")) {
+		path = find_existing_path({ base_dir.path_join("libsteam_api.dylib"),
+			base_dir.path_join("../Frameworks/libsteam_api.dylib") });
+	}
+
+	return path;
+}
+
+String SteamTracker::find_existing_path(const Vector<String> &paths) {
+	for (const String &p : paths) {
+		if (FileAccess::exists(p)) {
+			return p;
+		}
+	}
+	return String(); // Return empty if no valid path found
+}
+
+bool SteamTracker::load_steam_library(const String &path) {
 	Error err = OS::get_singleton()->open_dynamic_library(path, steam_library_handle);
 	if (err != OK) {
 		steam_library_handle = nullptr;
-		return;
+		return false;
 	}
 	print_verbose("Loaded SteamAPI library");
+	return true;
+}
 
+void SteamTracker::initialize_steam_api() {
 	void *symbol_handle = nullptr;
-	err = OS::get_singleton()->get_dynamic_library_symbol_handle(steam_library_handle, "SteamAPI_InitFlat", symbol_handle, true); // Try new API, 1.59+.
-	if (err != OK) {
-		err = OS::get_singleton()->get_dynamic_library_symbol_handle(steam_library_handle, "SteamAPI_Init", symbol_handle); // Try old API.
-		if (err != OK) {
-			return;
-		}
-		steam_init_function = (SteamAPI_InitFunction)symbol_handle;
-	} else {
+
+	if (OS::get_singleton()->get_dynamic_library_symbol_handle(steam_library_handle, "SteamAPI_InitFlat", symbol_handle, true) == OK) {
 		steam_init_flat_function = (SteamAPI_InitFlatFunction)symbol_handle;
+	} else if (OS::get_singleton()->get_dynamic_library_symbol_handle(steam_library_handle, "SteamAPI_Init", symbol_handle) == OK) {
+		steam_init_function = (SteamAPI_InitFunction)symbol_handle;
 	}
 
-	err = OS::get_singleton()->get_dynamic_library_symbol_handle(steam_library_handle, "SteamAPI_Shutdown", symbol_handle);
-	if (err != OK) {
-		return;
+	if (OS::get_singleton()->get_dynamic_library_symbol_handle(steam_library_handle, "SteamAPI_Shutdown", symbol_handle) == OK) {
+		steam_shutdown_function = (SteamAPI_ShutdownFunction)symbol_handle;
 	}
-	steam_shutdown_function = (SteamAPI_ShutdownFunction)symbol_handle;
 
 	if (steam_init_flat_function) {
 		char err_msg[1024] = {};
@@ -98,13 +104,5 @@ SteamTracker::SteamTracker() {
 	}
 }
 
-SteamTracker::~SteamTracker() {
-	if (steam_shutdown_function && steam_initialized) {
-		steam_shutdown_function();
-	}
-	if (steam_library_handle) {
-		OS::get_singleton()->close_dynamic_library(steam_library_handle);
-	}
-}
 
 #endif // STEAMAPI_ENABLED
