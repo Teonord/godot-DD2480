@@ -485,7 +485,7 @@ Vector3 Basis::get_euler(EulerOrder p_order) const {
 					if (rows[0][1] == 0) basis_coverage_testing_data_structure[6]++;
 					if (rows[1][2] == 0) basis_coverage_testing_data_structure[7]++;
 					if (rows[2][1] == 0) basis_coverage_testing_data_structure[8]++;
-					if (rows[1][1] == 0) basis_coverage_testing_data_structure[9]++; // test
+					if (rows[1][1] == 1) basis_coverage_testing_data_structure[9]++; // test
 					if (rows[1][0] == 0 && rows[0][1] == 0 && rows[1][2] == 0 && rows[2][1] == 0 && rows[1][1] == 1) {
 						// return the simplest form (human friendlier in editor and scripts)
 						euler.x = 0;
