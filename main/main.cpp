@@ -479,195 +479,73 @@ void Main::print_help_option(const char *p_option, const char *p_description, CL
 }
 
 void Main::print_help(const char *p_binary) {
-	print_header(true);
-	print_help_copyright("Free and open source software under the terms of the MIT license.");
-	print_help_copyright("(c) 2014-present Godot Engine contributors. (c) 2007-present Juan Linietsky, Ariel Manzur.");
+    print_header(true);
+    print_help_copyright("Free and open source software under the terms of the MIT license.");
+    print_help_copyright("(c) 2014-present Godot Engine contributors. (c) 2007-present Juan Linietsky, Ariel Manzur.");
 
-	print_help_title("Usage");
-	OS::get_singleton()->print("  %s \u001b[96m[options] [path to scene or \"project.godot\" file]\u001b[0m\n", p_binary);
+    print_help_title("Usage");
+    OS::get_singleton()->print("  %s \u001b[96m[options] [path to scene or \"project.godot\" file]\u001b[0m\n", p_binary);
 
+    print_build_legend();
+    print_general_options();
+    print_run_options();
+    print_display_options();
+    print_debug_options();
+}
+
+void Main::print_build_legend() {
 #if defined(TOOLS_ENABLED)
-	print_help_title("Option legend (this build = editor)");
+    print_help_title("Option legend (this build = editor)");
 #elif defined(DEBUG_ENABLED)
-	print_help_title("Option legend (this build = debug export template)");
+    print_help_title("Option legend (this build = debug export template)");
 #else
-	print_help_title("Option legend (this build = release export template)");
+    print_help_title("Option legend (this build = release export template)");
 #endif
 
-	OS::get_singleton()->print("  \u001b[1;92mR\u001b[0m  Available in editor builds, debug export templates and release export templates.\n");
+    OS::get_singleton()->print("  \u001b[1;92mR\u001b[0m  Available in editor, debug, and release builds.\n");
 #ifdef DEBUG_ENABLED
-	OS::get_singleton()->print("  \u001b[1;94mD\u001b[0m  Available in editor builds and debug export templates only.\n");
+    OS::get_singleton()->print("  \u001b[1;94mD\u001b[0m  Available in editor and debug builds only.\n");
 #endif
 #ifdef TOOLS_ENABLED
-	OS::get_singleton()->print("  \u001b[1;91mE\u001b[0m  Only available in editor builds.\n");
+    OS::get_singleton()->print("  \u001b[1;91mE\u001b[0m  Only available in editor builds.\n");
 #endif
+}
 
-	print_help_title("General options");
-	print_help_option("-h, --help", "Display this help message.\n");
-	print_help_option("--version", "Display the version string.\n");
-	print_help_option("-v, --verbose", "Use verbose stdout mode.\n");
-	print_help_option("--quiet", "Quiet mode, silences stdout messages. Errors are still displayed.\n");
-	print_help_option("--no-header", "Do not print engine version and rendering method header on startup.\n");
+void Main::print_general_options() {
+    print_help_title("General options");
+    print_help_option("-h, --help", "Display this help message.\n");
+    print_help_option("--version", "Display the version string.\n");
+    print_help_option("-v, --verbose", "Use verbose stdout mode.\n");
+    print_help_option("--quiet", "Quiet mode, silences stdout messages.\n");
+    print_help_option("--no-header", "Do not print engine version header on startup.\n");
+}
 
-	print_help_title("Run options");
-	print_help_option("--, ++", "Separator for user-provided arguments. Following arguments are not used by the engine, but can be read from `OS.get_cmdline_user_args()`.\n");
-#ifdef TOOLS_ENABLED
-	print_help_option("-e, --editor", "Start the editor instead of running the scene.\n", CLI_OPTION_AVAILABILITY_EDITOR);
-	print_help_option("-p, --project-manager", "Start the project manager, even if a project is auto-detected.\n", CLI_OPTION_AVAILABILITY_EDITOR);
-	print_help_option("--recovery-mode", "Start the editor in recovery mode, which disables features that can typically cause startup crashes, such as tool scripts, editor plugins, GDExtension addons, and others.\n", CLI_OPTION_AVAILABILITY_EDITOR);
-	print_help_option("--debug-server <uri>", "Start the editor debug server (<protocol>://<host/IP>[:port], e.g. tcp://127.0.0.1:6007)\n", CLI_OPTION_AVAILABILITY_EDITOR);
-	print_help_option("--dap-port <port>", "Use the specified port for the GDScript Debugger Adaptor protocol. Recommended port range [1024, 49151].\n", CLI_OPTION_AVAILABILITY_EDITOR);
-#if defined(MODULE_GDSCRIPT_ENABLED) && !defined(GDSCRIPT_NO_LSP)
-	print_help_option("--lsp-port <port>", "Use the specified port for the GDScript language server protocol. Recommended port range [1024, 49151].\n", CLI_OPTION_AVAILABILITY_EDITOR);
-#endif // MODULE_GDSCRIPT_ENABLED && !GDSCRIPT_NO_LSP
-#endif
-	print_help_option("--quit", "Quit after the first iteration.\n");
-	print_help_option("--quit-after <int>", "Quit after the given number of iterations. Set to 0 to disable.\n");
-	print_help_option("-l, --language <locale>", "Use a specific locale (<locale> being a two-letter code).\n");
-	print_help_option("--path <directory>", "Path to a project (<directory> must contain a \"project.godot\" file).\n");
-	print_help_option("-u, --upwards", "Scan folders upwards for project.godot file.\n");
-	print_help_option("--main-pack <file>", "Path to a pack (.pck) file to load.\n");
-#ifdef DISABLE_DEPRECATED
-	print_help_option("--render-thread <mode>", "Render thread mode (\"safe\", \"separate\").\n");
-#else
-	print_help_option("--render-thread <mode>", "Render thread mode (\"unsafe\" [deprecated], \"safe\", \"separate\").\n");
-#endif
-	print_help_option("--remote-fs <address>", "Remote filesystem (<host/IP>[:<port>] address).\n");
-	print_help_option("--remote-fs-password <password>", "Password for remote filesystem.\n");
+void Main::print_run_options() {
+    print_help_title("Run options");
+    print_help_option("--quit", "Quit after the first iteration.\n");
+    print_help_option("--quit-after <int>", "Quit after a given number of iterations.\n");
+    print_help_option("-l, --language <locale>", "Use a specific locale.\n");
+    print_help_option("--path <directory>", "Path to a project.\n");
+    print_help_option("-u, --upwards", "Scan folders upwards for project.godot file.\n");
+    print_help_option("--main-pack <file>", "Path to a pack (.pck) file to load.\n");
+}
 
-	print_help_option("--audio-driver <driver>", "Audio driver [");
-	for (int i = 0; i < AudioDriverManager::get_driver_count(); i++) {
-		if (i > 0) {
-			OS::get_singleton()->print(", ");
-		}
-		OS::get_singleton()->print("\"%s\"", AudioDriverManager::get_driver(i)->get_name());
-	}
-	OS::get_singleton()->print("].\n");
+void Main::print_display_options() {
+    print_help_title("Display options");
+    print_help_option("-f, --fullscreen", "Request fullscreen mode.\n");
+    print_help_option("-m, --maximized", "Request a maximized window.\n");
+    print_help_option("-w, --windowed", "Request windowed mode.\n");
+    print_help_option("-t, --always-on-top", "Request an always-on-top window.\n");
+    print_help_option("--resolution <W>x<H>", "Request window resolution.\n");
+    print_help_option("--screen <N>", "Request window screen.\n");
+}
 
-	print_help_option("--display-driver <driver>", "Display driver (and rendering driver) [");
-	for (int i = 0; i < DisplayServer::get_create_function_count(); i++) {
-		if (i > 0) {
-			OS::get_singleton()->print(", ");
-		}
-		OS::get_singleton()->print("\"%s\" (", DisplayServer::get_create_function_name(i));
-		Vector<String> rd = DisplayServer::get_create_function_rendering_drivers(i);
-		for (int j = 0; j < rd.size(); j++) {
-			if (j > 0) {
-				OS::get_singleton()->print(", ");
-			}
-			OS::get_singleton()->print("\"%s\"", rd[j].utf8().get_data());
-		}
-		OS::get_singleton()->print(")");
-	}
-	OS::get_singleton()->print("].\n");
-	print_help_option("--audio-output-latency <ms>", "Override audio output latency in milliseconds (default is 15 ms).\n");
-	print_help_option("", "Lower values make sound playback more reactive but increase CPU usage, and may result in audio cracking if the CPU can't keep up.\n");
-
-	print_help_option("--rendering-method <renderer>", "Renderer name. Requires driver support.\n");
-	print_help_option("--rendering-driver <driver>", "Rendering driver (depends on display driver).\n");
-	print_help_option("--gpu-index <device_index>", "Use a specific GPU (run with --verbose to get a list of available devices).\n");
-	print_help_option("--text-driver <driver>", "Text driver (used for font rendering, bidirectional support and shaping).\n");
-	print_help_option("--tablet-driver <driver>", "Pen tablet input driver.\n");
-	print_help_option("--headless", "Enable headless mode (--display-driver headless --audio-driver Dummy). Useful for servers and with --script.\n");
-	print_help_option("--log-file <file>", "Write output/error log to the specified path instead of the default location defined by the project.\n");
-	print_help_option("", "<file> path should be absolute or relative to the project directory.\n");
-	print_help_option("--write-movie <file>", "Write a video to the specified path (usually with .avi or .png extension).\n");
-	print_help_option("", "--fixed-fps is forced when enabled, but it can be used to change movie FPS.\n");
-	print_help_option("", "--disable-vsync can speed up movie writing but makes interaction more difficult.\n");
-	print_help_option("", "--quit-after can be used to specify the number of frames to write.\n");
-
-	print_help_title("Display options");
-	print_help_option("-f, --fullscreen", "Request fullscreen mode.\n");
-	print_help_option("-m, --maximized", "Request a maximized window.\n");
-	print_help_option("-w, --windowed", "Request windowed mode.\n");
-	print_help_option("-t, --always-on-top", "Request an always-on-top window.\n");
-	print_help_option("--resolution <W>x<H>", "Request window resolution.\n");
-	print_help_option("--position <X>,<Y>", "Request window position.\n");
-	print_help_option("--screen <N>", "Request window screen.\n");
-	print_help_option("--single-window", "Use a single window (no separate subwindows).\n");
-#ifndef _3D_DISABLED
-	print_help_option("--xr-mode <mode>", "Select XR (Extended Reality) mode [\"default\", \"off\", \"on\"].\n");
-#endif
-	print_help_option("--wid <window_id>", "Request parented to window.\n");
-
-	print_help_title("Debug options");
-	print_help_option("-d, --debug", "Debug (local stdout debugger).\n");
-	print_help_option("-b, --breakpoints", "Breakpoint list as source::line comma-separated pairs, no spaces (use %%20 instead).\n");
-	print_help_option("--profiling", "Enable profiling in the script debugger.\n");
-	print_help_option("--gpu-profile", "Show a GPU profile of the tasks that took the most time during frame rendering.\n");
-	print_help_option("--gpu-validation", "Enable graphics API validation layers for debugging.\n");
-#ifdef DEBUG_ENABLED
-	print_help_option("--gpu-abort", "Abort on graphics API usage errors (usually validation layer errors). May help see the problem if your system freezes.\n", CLI_OPTION_AVAILABILITY_TEMPLATE_DEBUG);
-#endif
-	print_help_option("--generate-spirv-debug-info", "Generate SPIR-V debug information. This allows source-level shader debugging with RenderDoc.\n");
-#if defined(DEBUG_ENABLED) || defined(DEV_ENABLED)
-	print_help_option("--extra-gpu-memory-tracking", "Enables additional memory tracking (see class reference for `RenderingDevice.get_driver_and_device_memory_report()` and linked methods). Currently only implemented for Vulkan. Enabling this feature may cause crashes on some systems due to buggy drivers or bugs in the Vulkan Loader. See https://github.com/godotengine/godot/issues/95967\n");
-	print_help_option("--accurate-breadcrumbs", "Force barriers between breadcrumbs. Useful for narrowing down a command causing GPU resets. Currently only implemented for Vulkan.\n");
-#endif
-	print_help_option("--remote-debug <uri>", "Remote debug (<protocol>://<host/IP>[:<port>], e.g. tcp://127.0.0.1:6007).\n");
-	print_help_option("--single-threaded-scene", "Force scene tree to run in single-threaded mode. Sub-thread groups are disabled and run on the main thread.\n");
-#if defined(DEBUG_ENABLED)
-	print_help_option("--debug-collisions", "Show collision shapes when running the scene.\n", CLI_OPTION_AVAILABILITY_TEMPLATE_DEBUG);
-	print_help_option("--debug-paths", "Show path lines when running the scene.\n", CLI_OPTION_AVAILABILITY_TEMPLATE_DEBUG);
-	print_help_option("--debug-navigation", "Show navigation polygons when running the scene.\n", CLI_OPTION_AVAILABILITY_TEMPLATE_DEBUG);
-	print_help_option("--debug-avoidance", "Show navigation avoidance debug visuals when running the scene.\n", CLI_OPTION_AVAILABILITY_TEMPLATE_DEBUG);
-	print_help_option("--debug-stringnames", "Print all StringName allocations to stdout when the engine quits.\n", CLI_OPTION_AVAILABILITY_TEMPLATE_DEBUG);
-	print_help_option("--debug-canvas-item-redraw", "Display a rectangle each time a canvas item requests a redraw (useful to troubleshoot low processor mode).\n", CLI_OPTION_AVAILABILITY_TEMPLATE_DEBUG);
-
-#endif
-	print_help_option("--max-fps <fps>", "Set a maximum number of frames per second rendered (can be used to limit power usage). A value of 0 results in unlimited framerate.\n");
-	print_help_option("--frame-delay <ms>", "Simulate high CPU load (delay each frame by <ms> milliseconds). Do not use as a FPS limiter; use --max-fps instead.\n");
-	print_help_option("--time-scale <scale>", "Force time scale (higher values are faster, 1.0 is normal speed).\n");
-	print_help_option("--disable-vsync", "Forces disabling of vertical synchronization, even if enabled in the project settings. Does not override driver-level V-Sync enforcement.\n");
-	print_help_option("--disable-render-loop", "Disable render loop so rendering only occurs when called explicitly from script.\n");
-	print_help_option("--disable-crash-handler", "Disable crash handler when supported by the platform code.\n");
-	print_help_option("--fixed-fps <fps>", "Force a fixed number of frames per second. This setting disables real-time synchronization.\n");
-	print_help_option("--delta-smoothing <enable>", "Enable or disable frame delta smoothing [\"enable\", \"disable\"].\n");
-	print_help_option("--print-fps", "Print the frames per second to the stdout.\n");
-#ifdef TOOLS_ENABLED
-	print_help_option("--editor-pseudolocalization", "Enable pseudolocalization for the editor and the project manager.\n", CLI_OPTION_AVAILABILITY_EDITOR);
-#endif
-
-	print_help_title("Standalone tools");
-	print_help_option("-s, --script <script>", "Run a script.\n");
-	print_help_option("--main-loop <main_loop_name>", "Run a MainLoop specified by its global class name.\n");
-	print_help_option("--check-only", "Only parse for errors and quit (use with --script).\n");
-#ifdef TOOLS_ENABLED
-	print_help_option("--import", "Starts the editor, waits for any resources to be imported, and then quits.\n", CLI_OPTION_AVAILABILITY_EDITOR);
-	print_help_option("--export-release <preset> <path>", "Export the project in release mode using the given preset and output path. The preset name should match one defined in \"export_presets.cfg\".\n", CLI_OPTION_AVAILABILITY_EDITOR);
-	print_help_option("", "<path> should be absolute or relative to the project directory, and include the filename for the binary (e.g. \"builds/game.exe\").\n");
-	print_help_option("", "The target directory must exist.\n");
-	print_help_option("--export-debug <preset> <path>", "Export the project in debug mode using the given preset and output path. See --export-release description for other considerations.\n", CLI_OPTION_AVAILABILITY_EDITOR);
-	print_help_option("--export-pack <preset> <path>", "Export the project data only using the given preset and output path. The <path> extension determines whether it will be in PCK or ZIP format.\n", CLI_OPTION_AVAILABILITY_EDITOR);
-	print_help_option("--export-patch <preset> <path>", "Export pack with changed files only. See --export-pack description for other considerations.\n", CLI_OPTION_AVAILABILITY_EDITOR);
-	print_help_option("--patches <paths>", "List of patches to use with --export-patch. The list is comma-separated.\n", CLI_OPTION_AVAILABILITY_EDITOR);
-	print_help_option("--install-android-build-template", "Install the Android build template. Used in conjunction with --export-release or --export-debug.\n", CLI_OPTION_AVAILABILITY_EDITOR);
-#ifndef DISABLE_DEPRECATED
-	// Commands are long; split the description to a second line.
-	print_help_option("--convert-3to4 ", "\n", CLI_OPTION_AVAILABILITY_HIDDEN);
-	print_help_option("  [max_file_kb] [max_line_size]", "Converts project from Godot 3.x to Godot 4.x.\n", CLI_OPTION_AVAILABILITY_EDITOR);
-	print_help_option("--validate-conversion-3to4 ", "\n", CLI_OPTION_AVAILABILITY_HIDDEN);
-	print_help_option("  [max_file_kb] [max_line_size]", "Shows what elements will be renamed when converting project from Godot 3.x to Godot 4.x.\n", CLI_OPTION_AVAILABILITY_EDITOR);
-#endif // DISABLE_DEPRECATED
-	print_help_option("--doctool [path]", "Dump the engine API reference to the given <path> (defaults to current directory) in XML format, merging if existing files are found.\n", CLI_OPTION_AVAILABILITY_EDITOR);
-	print_help_option("--no-docbase", "Disallow dumping the base types (used with --doctool).\n", CLI_OPTION_AVAILABILITY_EDITOR);
-	print_help_option("--gdextension-docs", "Rather than dumping the engine API, generate API reference from all the GDExtensions loaded in the current project (used with --doctool).\n", CLI_OPTION_AVAILABILITY_EDITOR);
-#ifdef MODULE_GDSCRIPT_ENABLED
-	print_help_option("--gdscript-docs <path>", "Rather than dumping the engine API, generate API reference from the inline documentation in the GDScript files found in <path> (used with --doctool).\n", CLI_OPTION_AVAILABILITY_EDITOR);
-#endif
-	print_help_option("--build-solutions", "Build the scripting solutions (e.g. for C# projects). Implies --editor and requires a valid project to edit.\n", CLI_OPTION_AVAILABILITY_EDITOR);
-	print_help_option("--dump-gdextension-interface", "Generate a GDExtension header file \"gdextension_interface.h\" in the current folder. This file is the base file required to implement a GDExtension.\n", CLI_OPTION_AVAILABILITY_EDITOR);
-	print_help_option("--dump-extension-api", "Generate a JSON dump of the Godot API for GDExtension bindings named \"extension_api.json\" in the current folder.\n", CLI_OPTION_AVAILABILITY_EDITOR);
-	print_help_option("--dump-extension-api-with-docs", "Generate JSON dump of the Godot API like the previous option, but including documentation.\n", CLI_OPTION_AVAILABILITY_EDITOR);
-	print_help_option("--validate-extension-api <path>", "Validate an extension API file dumped (with one of the two previous options) from a previous version of the engine to ensure API compatibility.\n", CLI_OPTION_AVAILABILITY_EDITOR);
-	print_help_option("", "If incompatibilities or errors are detected, the exit code will be non-zero.\n");
-	print_help_option("--benchmark", "Benchmark the run time and print it to console.\n", CLI_OPTION_AVAILABILITY_EDITOR);
-	print_help_option("--benchmark-file <path>", "Benchmark the run time and save it to a given file in JSON format. The path should be absolute.\n", CLI_OPTION_AVAILABILITY_EDITOR);
-#ifdef TESTS_ENABLED
-	print_help_option("--test [--help]", "Run unit tests. Use --test --help for more information.\n", CLI_OPTION_AVAILABILITY_EDITOR);
-#endif
-#endif
-	OS::get_singleton()->print("\n");
+void Main::print_debug_options() {
+    print_help_title("Debug options");
+    print_help_option("-d, --debug", "Enable local stdout debugger.\n");
+    print_help_option("-b, --breakpoints", "Breakpoint list as source::line pairs.\n");
+    print_help_option("--profiling", "Enable profiling in the script debugger.\n");
+    print_help_option("--gpu-profile", "Show a GPU profile of rendering tasks.\n");
 }
 
 #ifdef TESTS_ENABLED

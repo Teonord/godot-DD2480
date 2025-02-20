@@ -74,6 +74,12 @@ public:
 	static Error setup2(bool p_show_boot_logo = true); // The thread calling setup2() will effectively become the main thread.
 	static String get_rendering_driver_name();
 	static void setup_boot_logo();
+	static void print_build_legend();
+	static void print_general_options();
+	static void print_run_options();
+	static void print_display_options();
+	static void print_debug_options();
+
 #ifdef TESTS_ENABLED
 	static Error test_setup();
 	static void test_cleanup();
