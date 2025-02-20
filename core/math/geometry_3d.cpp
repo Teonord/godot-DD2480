@@ -62,123 +62,64 @@ void Geometry3D::get_closest_points_between_segments(const Vector3 &p_p0, const 
 			if (e <= 0.0f) {
                 geometry_3d_coverage_testing_data_structure[2]++;
 				// t <= 0.0f
-                if(-d >= a){
-                    geometry_3d_coverage_testing_data_structure[3]++;
-                    s = 1;
-                } else if (-d > 0.0f){
-                    geometry_3d_coverage_testing_data_structure[4]++;
-                    s = -d/a;
-                } else {
-                    geometry_3d_coverage_testing_data_structure[5]++;
-                    s = 0.0f;
-                }
+				s = (-d >= a ? 1 : (-d > 0.0f ? -d / a : 0.0f));
 				t = 0.0f;
 			} else if (e < c) {
-                geometry_3d_coverage_testing_data_structure[6]++;
+                geometry_3d_coverage_testing_data_structure[3]++;
 				// 0.0f < t < 1
 				s = 0.0f;
 				t = e / c;
 			} else {
-                geometry_3d_coverage_testing_data_structure[7]++;
 				// t >= 1
-				//s = (b - d >= a ? 1 : (b - d > 0.0f ? (b - d) / a : 0.0f));
-                if (b - d >= a) {
-                    geometry_3d_coverage_testing_data_structure[8]++;
-                    s = 1;
-                } else if (b - d > 0.0f) {
-                    geometry_3d_coverage_testing_data_structure[9]++;
-                    s = (b - d) / a;
-                } else {
-                    geometry_3d_coverage_testing_data_structure[10]++;
-                    s = 0.0f;
-                }
+                geometry_3d_coverage_testing_data_structure[4]++;
+				s = (b - d >= a ? 1 : (b - d > 0.0f ? (b - d) / a : 0.0f));
 				t = 1;
 			}
 		} else {
-            geometry_3d_coverage_testing_data_structure[11]++;
 			// s > 0.0f
+            geometry_3d_coverage_testing_data_structure[5]++;
 			s = bte - ctd;
 			if (s >= det) {
-                geometry_3d_coverage_testing_data_structure[12]++;
 				// s >= 1
 				if (b + e <= 0.0f) {
-                    geometry_3d_coverage_testing_data_structure[13]++;
 					// t <= 0.0f
-					//s = (-d <= 0.0f ? 0.0f : (-d < a ? -d / a : 1));
-                    if (-d <= 0.0f) {
-                        geometry_3d_coverage_testing_data_structure[14]++;
-                        s = 0.0f;
-                    } else if (-d < a) {
-                        geometry_3d_coverage_testing_data_structure[15]++;
-                        s = -d / a;
-                    } else {
-                        geometry_3d_coverage_testing_data_structure[16]++;
-                        s = 1;
-                    }
+                    geometry_3d_coverage_testing_data_structure[6]++;
+					s = (-d <= 0.0f ? 0.0f : (-d < a ? -d / a : 1));
 					t = 0.0f;
 				} else if (b + e < c) {
-                    geometry_3d_coverage_testing_data_structure[17]++;
+                    geometry_3d_coverage_testing_data_structure[7]++;
 					// 0.0f < t < 1
 					s = 1;
 					t = (b + e) / c;
 				} else {
-                    geometry_3d_coverage_testing_data_structure[18]++;
+                    geometry_3d_coverage_testing_data_structure[8]++;
 					// t >= 1
-					//s = (b - d <= 0.0f ? 0.0f : (b - d < a ? (b - d) / a : 1));
-                    if (b - d <= 0.0f) {
-                        geometry_3d_coverage_testing_data_structure[19]++;
-                        s = 0.0f;
-                    } else if (b - d < a) {
-                        geometry_3d_coverage_testing_data_structure[20]++;
-                        s = (b - d) / a;
-                    } else {
-                        geometry_3d_coverage_testing_data_structure[21]++;
-                        s = 1;
-                    }
+					s = (b - d <= 0.0f ? 0.0f : (b - d < a ? (b - d) / a : 1));
 					t = 1;
 				}
 			} else {
-                geometry_3d_coverage_testing_data_structure[22]++;
 				// 0.0f < s < 1
 				real_t ate = a * e;
 				real_t btd = b * d;
+                geometry_3d_coverage_testing_data_structure[9]++;
 
 				if (ate <= btd) {
-                    geometry_3d_coverage_testing_data_structure[23]++;
 					// t <= 0.0f
-					//s = (-d <= 0.0f ? 0.0f : (-d >= a ? 1 : -d / a));
-                    if (-d <= 0.0f) {
-                        geometry_3d_coverage_testing_data_structure[24]++;
-                        s = 0.0f;
-                    } else if (-d >= a) {
-                        geometry_3d_coverage_testing_data_structure[25]++;
-                        s = 1;
-                    } else {
-                        geometry_3d_coverage_testing_data_structure[26]++;
-                        s = -d / a;
-                    }
+                    geometry_3d_coverage_testing_data_structure[10]++;
+					s = (-d <= 0.0f ? 0.0f : (-d >= a ? 1 : -d / a));
 					t = 0.0f;
 				} else {
-                    geometry_3d_coverage_testing_data_structure[27]++;
 					// t > 0.0f
+                    geometry_3d_coverage_testing_data_structure[11]++;
 					t = ate - btd;
 					if (t >= det) {
-                        geometry_3d_coverage_testing_data_structure[28]++;
 						// t >= 1
-						if(b - d <= 0.0f) {
-                            geometry_3d_coverage_testing_data_structure[29]++;
-                            s = 0.0f;
-                        } else if (b - d >= a) {
-                            geometry_3d_coverage_testing_data_structure[30]++;
-                            s = 1;
-                        } else {
-                            geometry_3d_coverage_testing_data_structure[31]++;
-                            s = (b - d) / a;
-                        }
+                        geometry_3d_coverage_testing_data_structure[12]++;
+						s = (b - d <= 0.0f ? 0.0f : (b - d >= a ? 1 : (b - d) / a));
 						t = 1;
 					} else {
-                        geometry_3d_coverage_testing_data_structure[32]++;
 						// 0.0f < t < 1
+                        geometry_3d_coverage_testing_data_structure[13]++;
 						s /= det;
 						t /= det;
 					}
@@ -187,35 +128,16 @@ void Geometry3D::get_closest_points_between_segments(const Vector3 &p_p0, const 
 		}
 	} else {
 		// Parallel segments
-        geometry_3d_coverage_testing_data_structure[33]++;
 		if (e <= 0.0f) {
-            geometry_3d_coverage_testing_data_structure[34]++;
-			if (-d <= 0.0f) {
-                geometry_3d_coverage_testing_data_structure[35]++;
-                s = 0.0f;
-            } else if (-d >= a) {
-                geometry_3d_coverage_testing_data_structure[36]++;
-                s = 1;
-            } else {
-                geometry_3d_coverage_testing_data_structure[37]++;
-                s = -d / a;
-            }
+            geometry_3d_coverage_testing_data_structure[14]++;
+			s = (-d <= 0.0f ? 0.0f : (-d >= a ? 1 : -d / a));
 			t = 0.0f;
 		} else if (e >= c) {
-            geometry_3d_coverage_testing_data_structure[38]++;
-			if (b - d <= 0.0f) {
-                geometry_3d_coverage_testing_data_structure[39]++;
-                s = 0.0f;
-            } else if (b - d >= a) {
-                geometry_3d_coverage_testing_data_structure[40]++;
-                s = 1;
-            } else {
-                geometry_3d_coverage_testing_data_structure[41]++;
-                s = (b - d) / a;
-            }
+            geometry_3d_coverage_testing_data_structure[15]++;
+			s = (b - d <= 0.0f ? 0.0f : (b - d >= a ? 1 : (b - d) / a));
 			t = 1;
 		} else {
-            geometry_3d_coverage_testing_data_structure[42]++;
+            geometry_3d_coverage_testing_data_structure[16]++;
 			s = 0.0f;
 			t = e / c;
 		}
@@ -223,13 +145,6 @@ void Geometry3D::get_closest_points_between_segments(const Vector3 &p_p0, const 
 
 	r_ps = (1 - s) * p_p0 + s * p_p1;
 	r_qt = (1 - t) * p_q0 + t * p_q1;
-}
-
-real_t Geometry3D::clamp(real_t val, real_t min, real_t max){
-    //could use ternary as in the original, but prefer if else since it is easier to understand whats going on.
-    if(val < min) return min;
-    else if (val > max) return max;
-    else return val;
 }
 
 real_t Geometry3D::get_closest_distance_between_segments(const Vector3 &p_p0, const Vector3 &p_p1, const Vector3 &p_q0, const Vector3 &p_q1) {
