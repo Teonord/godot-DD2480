@@ -43,155 +43,116 @@ void MainFrameTime::clamp_process_step(double min_process_step, double max_proce
 
 /////////////////////////////////
 
-void MainTimerSync::DeltaSmoother::update_refresh_rate_estimator(int64_t p_delta) {
-	// the calling code should prevent 0 or negative values of delta
-	// (preventing divide by zero)
 
-	// note that if the estimate gets locked, and something external changes this
-	// (e.g. user changes to non-vsync in the OS), then the results may be less than ideal,
-	// but usually it will detect this via the FPS measurement and not attempt smoothing.
-	// This should be a rare occurrence anyway, and will be cured next time user restarts game.
+void MainTimerSync::DeltaSmoother::update_refresh_rate_estimator(int64_t p_delta) {
 	if (_estimate_locked) {
 		return;
 	}
 
-	// First average the delta over NUM_READINGS
-	_estimator_total_delta += p_delta;
-	_estimator_delta_readings++;
-
-	const int NUM_READINGS = 60;
-
-	if (_estimator_delta_readings < NUM_READINGS) {
+	// Step 1: Accumulate deltas
+	if (!accumulate_frame_delta(p_delta)) {
 		return;
 	}
 
-	// use average
-	p_delta = _estimator_total_delta / NUM_READINGS;
-
-	// reset the averager for next time
-	_estimator_delta_readings = 0;
-	_estimator_total_delta = 0;
-
-	///////////////////////////////
-
+	// Step 2: Compute FPS estimate
 	int fps = Math::round(1000000.0 / p_delta);
 
-	// initial estimation, to speed up converging, special case we will estimate the refresh rate
-	// from the first average FPS reading
-	if (_estimated_fps == 0) {
-		// below 50 might be chugging loading stuff, or else
-		// dropping loads of frames, so the estimate will be inaccurate
-		if (fps >= 50) {
-			_estimated_fps = fps;
-#ifdef GODOT_DEBUG_DELTA_SMOOTHER
-			print_line("initial guess (average measured) refresh rate: " + itos(fps));
-#endif
-		} else {
-			// can't get started until above 50
-			return;
-		}
+	// Step 3: Initialize FPS estimate if needed
+	if (initialize_fps_estimate(fps)) {
+		return;
 	}
 
-	// we hit our exact estimated refresh rate.
-	// increase our confidence in the estimate.
+	// Step 4: Check for hits and adjust estimation confidence
+	if (adjust_fps_estimate(fps)) {
+		return;
+	}
+
+	// Step 5: Adjust FPS estimate based on fluctuations
+	if (fps > _estimated_fps) {
+		increase_fps_estimate(fps);
+	} else if (fps < _estimated_fps) {
+		decrease_fps_estimate(fps);
+	}
+}
+
+
+bool MainTimerSync::DeltaSmoother::accumulate_frame_delta(int64_t &p_delta) {
+	const int NUM_READINGS = 60;
+
+	_estimator_total_delta += p_delta;
+	_estimator_delta_readings++;
+
+	if (_estimator_delta_readings < NUM_READINGS) {
+		return false;
+	}
+
+	// Compute average
+	p_delta = _estimator_total_delta / NUM_READINGS;
+	_estimator_total_delta = 0;
+	_estimator_delta_readings = 0;
+	return true;
+}
+
+bool MainTimerSync::DeltaSmoother::initialize_fps_estimate(int fps) {
+	if (_estimated_fps == 0 && fps >= 50) {
+		_estimated_fps = fps;
+		return true;
+	}
+	return false;
+}
+
+bool MainTimerSync::DeltaSmoother::adjust_fps_estimate(int fps) {
 	if (fps == _estimated_fps) {
-		// note that each hit is an average of NUM_READINGS frames
 		_hits_at_estimated++;
 
 		if (_estimate_complete && _hits_at_estimated == 20) {
 			_estimate_locked = true;
-#ifdef GODOT_DEBUG_DELTA_SMOOTHER
-			print_line("estimate LOCKED at " + itos(_estimated_fps) + " fps");
-#endif
-			return;
+			return true;
 		}
 
-		// if we are getting pretty confident in this estimate, decide it is complete
-		// (it can still be increased later, and possibly lowered but only for a short time)
-		if ((!_estimate_complete) && (_hits_at_estimated > 2)) {
-			// when the estimate is complete we turn on smoothing
-			if (_estimated_fps) {
-				_estimate_complete = true;
-				_vsync_delta = 1000000 / _estimated_fps;
-
-#ifdef GODOT_DEBUG_DELTA_SMOOTHER
-				print_line("estimate complete. vsync_delta " + itos(_vsync_delta) + ", fps " + itos(_estimated_fps));
-#endif
-			}
+		if (!_estimate_complete && _hits_at_estimated > 2) {
+			_estimate_complete = true;
+			_vsync_delta = 1000000 / _estimated_fps;
 		}
-
-#ifdef GODOT_DEBUG_DELTA_SMOOTHER
-		if ((_hits_at_estimated % (400 / NUM_READINGS)) == 0) {
-			String sz = "hits at estimated : " + itos(_hits_at_estimated) + ", above : " + itos(_hits_above_estimated) + "( " + itos(_hits_one_above_estimated) + " ), below : " + itos(_hits_below_estimated) + " (" + itos(_hits_one_below_estimated) + " )";
-
-			print_line(sz);
-		}
-#endif
-
-		return;
+		return true;
 	}
+	return false;
+}
 
+void MainTimerSync::DeltaSmoother::increase_fps_estimate(int fps) {
 	const int SIGNIFICANCE_UP = 1;
-	const int SIGNIFICANCE_DOWN = 2;
 
-	// we are not usually interested in slowing the estimate
-	// but we may have overshot, so make it possible to reduce
-	if (fps < _estimated_fps) {
-		// micro changes
-		if (fps == (_estimated_fps - 1)) {
-			_hits_one_below_estimated++;
-
-			if ((_hits_one_below_estimated > _hits_at_estimated) && (_hits_one_below_estimated > SIGNIFICANCE_DOWN)) {
-				_estimated_fps--;
-				made_new_estimate();
-			}
-
-			return;
-		} else {
-			_hits_below_estimated++;
-
-			// don't allow large lowering if we are established at a refresh rate, as it will probably be dropped frames
-			bool established = _estimate_complete && (_hits_at_estimated > 10);
-
-			// macro changes
-			// note there is a large barrier to macro lowering. That is because it is more likely to be dropped frames
-			// than mis-estimation of the refresh rate.
-			if (!established) {
-				if (((_hits_below_estimated / 8) > _hits_at_estimated) && (_hits_below_estimated > SIGNIFICANCE_DOWN)) {
-					// decrease the estimate
-					_estimated_fps--;
-					made_new_estimate();
-				}
-			}
-
-			return;
-		}
-	}
-
-	// Changes increasing the estimate.
-	// micro changes
-	if (fps == (_estimated_fps + 1)) {
+	if (fps == _estimated_fps + 1) {
 		_hits_one_above_estimated++;
-
-		if ((_hits_one_above_estimated > _hits_at_estimated) && (_hits_one_above_estimated > SIGNIFICANCE_UP)) {
+		if (_hits_one_above_estimated > _hits_at_estimated && _hits_one_above_estimated > SIGNIFICANCE_UP) {
 			_estimated_fps++;
 			made_new_estimate();
 		}
-		return;
 	} else {
 		_hits_above_estimated++;
-
-		// macro changes
-		if ((_hits_above_estimated > _hits_at_estimated) && (_hits_above_estimated > SIGNIFICANCE_UP)) {
-			// increase the estimate
-			int change = fps - _estimated_fps;
-			change /= 2;
-			change = MAX(1, change);
-
+		if (_hits_above_estimated > _hits_at_estimated && _hits_above_estimated > SIGNIFICANCE_UP) {
+			int change = MAX(1, (fps - _estimated_fps) / 2);
 			_estimated_fps += change;
 			made_new_estimate();
 		}
-		return;
+	}
+}
+
+void MainTimerSync::DeltaSmoother::decrease_fps_estimate(int fps) {
+	const int SIGNIFICANCE_DOWN = 2;
+
+	if (fps == _estimated_fps - 1) {
+		_hits_one_below_estimated++;
+		if (_hits_one_below_estimated > _hits_at_estimated && _hits_one_below_estimated > SIGNIFICANCE_DOWN) {
+			_estimated_fps--;
+			made_new_estimate();
+		}
+	} else {
+		_hits_below_estimated++;
+		if (_hits_below_estimated / 8 > _hits_at_estimated && _hits_below_estimated > SIGNIFICANCE_DOWN) {
+			_estimated_fps--;
+			made_new_estimate();
+		}
 	}
 }
 

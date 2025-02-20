@@ -49,9 +49,15 @@ class MainTimerSync {
 	public:
 		// pass the recorded delta, returns a smoothed delta
 		int64_t smooth_delta(int64_t p_delta);
+		void update_refresh_rate_estimator(int64_t p_delta);
 
 	private:
-		void update_refresh_rate_estimator(int64_t p_delta);
+		// Helper methods to reduce complexity
+		bool accumulate_frame_delta(int64_t &p_delta);
+		bool initialize_fps_estimate(int fps);
+		bool adjust_fps_estimate(int fps);
+		void increase_fps_estimate(int fps);
+		void decrease_fps_estimate(int fps);
 		bool fps_allows_smoothing(int64_t p_delta);
 
 		// estimated vsync delta (monitor refresh rate)
