@@ -64,6 +64,11 @@ class SteamTracker {
 	SteamAPI_ShutdownFunction steam_shutdown_function = nullptr;
 	bool steam_initialized = false;
 
+	String get_steam_library_path();
+	String find_existing_path(const Vector<String> &paths);
+	bool load_steam_library(const String &path);
+	void initialize_steam_api();
+
 public:
 	SteamTracker();
 	~SteamTracker();
