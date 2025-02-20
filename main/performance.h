@@ -135,6 +135,24 @@ public:
 	static Performance *get_singleton() { return singleton; }
 
 	Performance();
+
+private:
+    // Helper functions to split get_monitor()
+    double get_time_monitor(Monitor p_monitor) const;
+    double get_memory_monitor(Monitor p_monitor) const;
+    double get_object_monitor(Monitor p_monitor) const;
+    double get_render_monitor(Monitor p_monitor) const;
+    double get_physics_monitor(Monitor p_monitor) const;
+    double get_navigation_monitor(Monitor p_monitor) const;
+
+    // Helper functions to check monitor category
+    bool is_time_monitor(Monitor p_monitor) const;
+    bool is_memory_monitor(Monitor p_monitor) const;
+    bool is_object_monitor(Monitor p_monitor) const;
+    bool is_render_monitor(Monitor p_monitor) const;
+    bool is_physics_monitor(Monitor p_monitor) const;
+    bool is_navigation_monitor(Monitor p_monitor) const;
+
 };
 
 VARIANT_ENUM_CAST(Performance::Monitor);
