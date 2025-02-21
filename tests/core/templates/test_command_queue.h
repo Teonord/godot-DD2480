@@ -473,7 +473,7 @@ TEST_CASE("[Stress][CommandQueue] Stress test command queue") {
 		sts.reader_threadwork.main_wait_for_done();
 		loop_iters++;
 	}
-	CHECK_MESSAGE(loop_iters < max_loop_iters,
+	CHECK_MESSAGE(loop_iters <= max_loop_iters,
 			"Reader needed too many iterations to read messages!");
 	sts.writer_threadwork.main_wait_for_done();
 

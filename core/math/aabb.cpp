@@ -81,11 +81,11 @@ bool AABB::is_finite() const {
 }
 
 AABB AABB::intersection(const AABB &p_aabb) const {
-#ifdef MATH_CHECKS
-	if (unlikely(size.x < 0 || size.y < 0 || size.z < 0 || p_aabb.size.x < 0 || p_aabb.size.y < 0 || p_aabb.size.z < 0)) {
-		ERR_PRINT("AABB size is negative, this is not supported. Use AABB.abs() to get an AABB with a positive size.");
-	}
-#endif
+	#ifdef MATH_CHECKS
+		if (unlikely(size.x < 0 || size.y < 0 || size.z < 0 || p_aabb.size.x < 0 || p_aabb.size.y < 0 || p_aabb.size.z < 0)) {
+			ERR_PRINT("AABB size is negative, this is not supported. Use AABB.abs() to get an AABB with a positive size.");
+		}
+	#endif
 	Vector3 src_min = position;
 	Vector3 src_max = position + size;
 	Vector3 dst_min = p_aabb.position;
@@ -93,29 +93,17 @@ AABB AABB::intersection(const AABB &p_aabb) const {
 
 	Vector3 min, max;
 
-	if (src_min.x > dst_max.x || src_max.x < dst_min.x) {
-		return AABB();
-	} else {
-		min.x = (src_min.x > dst_min.x) ? src_min.x : dst_min.x;
-		max.x = (src_max.x < dst_max.x) ? src_max.x : dst_max.x;
-	}
-
-	if (src_min.y > dst_max.y || src_max.y < dst_min.y) {
-		return AABB();
-	} else {
-		min.y = (src_min.y > dst_min.y) ? src_min.y : dst_min.y;
-		max.y = (src_max.y < dst_max.y) ? src_max.y : dst_max.y;
-	}
-
-	if (src_min.z > dst_max.z || src_max.z < dst_min.z) {
-		return AABB();
-	} else {
-		min.z = (src_min.z > dst_min.z) ? src_min.z : dst_min.z;
-		max.z = (src_max.z < dst_max.z) ? src_max.z : dst_max.z;
+	for (int i = 0; i < 3; i++) {
+		if (src_min[i] > dst_max[i] || src_max[i] < dst_min[i]) {
+			return AABB();  // No intersection
+		}
+		min[i] = MAX(src_min[i], dst_min[i]);
+		max[i] = MIN(src_max[i], dst_max[i]);
 	}
 
 	return AABB(min, max - min);
 }
+	
 
 // Note that this routine returns the BACKTRACKED (i.e. behind the ray origin)
 // intersection point + normal if INSIDE the AABB.
