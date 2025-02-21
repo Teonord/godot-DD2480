@@ -49,6 +49,7 @@ struct [[nodiscard]] Rect2 {
 	const Vector2 &get_size() const { return size; }
 	void set_size(const Vector2 &p_size) { size = p_size; }
 
+
 	real_t get_area() const { return size.width * size.height; }
 
 	_FORCE_INLINE_ Vector2 get_center() const { return position + (size * 0.5f); }
@@ -130,6 +131,13 @@ struct [[nodiscard]] Rect2 {
 	bool intersects_transformed(const Transform2D &p_xform, const Rect2 &p_rect) const;
 
 	bool intersects_segment(const Point2 &p_from, const Point2 &p_to, Point2 *r_pos = nullptr, Point2 *r_normal = nullptr) const;
+
+	bool _itrans_intersections(Vector2 *xf_points, const Transform2D &p_xform) const;
+	bool _itrans_over_limit_y(Vector2 *xf_points) const;
+	bool _itrans_under_limit_y(Vector2 *xf_points) const;
+	bool _itrans_over_limit_x(Vector2 *xf_points) const;
+	bool _itrans_under_limit_x(Vector2 *xf_points) const;
+
 
 	inline bool encloses(const Rect2 &p_rect) const {
 #ifdef MATH_CHECKS

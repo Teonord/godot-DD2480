@@ -109,119 +109,96 @@ bool Rect2::intersects_segment(const Point2 &p_from, const Point2 &p_to, Point2 
 	return true;
 }
 
-bool Rect2::intersects_transformed(const Transform2D &p_xform, const Rect2 &p_rect) const {
-	rect2_coverage_testing_data_structure[1]++;
-
-#ifdef MATH_CHECKS
-	if (unlikely(size.x < 0 || size.y < 0 || p_rect.size.x < 0 || p_rect.size.y < 0)) {
-		if (unlikely(size.x < 0)) rect2_coverage_testing_data_structure[2]++;
-		if (unlikely(size.y < 0)) rect2_coverage_testing_data_structure[3]++;
-		if (unlikely(p_rect.size.x < 0)) rect2_coverage_testing_data_structure[4]++;
-		if (unlikely(p_rect.size.x < 0)) rect2_coverage_testing_data_structure[5]++;
-		ERR_PRINT("Rect2 size is negative, this is not supported. Use Rect2.abs() to get a Rect2 with a positive size.");
-	}
-#endif
-	//SAT intersection between local and transformed rect2
-
-	Vector2 xf_points[4] = {
-		p_xform.xform(p_rect.position),
-		p_xform.xform(Vector2(p_rect.position.x + p_rect.size.x, p_rect.position.y)),
-		p_xform.xform(Vector2(p_rect.position.x, p_rect.position.y + p_rect.size.y)),
-		p_xform.xform(Vector2(p_rect.position.x + p_rect.size.x, p_rect.position.y + p_rect.size.y)),
-	};
-
-	real_t low_limit;
-
-	//base rect2 first (faster)
-
-	if (xf_points[0].y > position.y) {
-		rect2_coverage_testing_data_structure[6]++;
-		goto next1;
-	}
-	if (xf_points[1].y > position.y) {
-		rect2_coverage_testing_data_structure[7]++;
-		goto next1;
-	}
-	if (xf_points[2].y > position.y) {
-		rect2_coverage_testing_data_structure[8]++;
-		goto next1;
-	}
-	if (xf_points[3].y > position.y) {
-		rect2_coverage_testing_data_structure[9]++;
-		goto next1;
-	}
-
-	return false;
-
-next1:
-
-	low_limit = position.y + size.y;
-
-	if (xf_points[0].y < low_limit) {
-		rect2_coverage_testing_data_structure[10]++;
-		goto next2;
-	}
-	if (xf_points[1].y < low_limit) {
+bool Rect2::_itrans_over_limit_y(Vector2 *xf_points) const { //1
+	rect2_coverage_testing_data_structure[10]++;
+	if (xf_points[0].y > position.y) {//2
 		rect2_coverage_testing_data_structure[11]++;
-		goto next2;
+		return true;
 	}
-	if (xf_points[2].y < low_limit) {
+	if (xf_points[1].y > position.y) {//3
 		rect2_coverage_testing_data_structure[12]++;
-		goto next2;
+		return true;
 	}
-	if (xf_points[3].y < low_limit) {
+	if (xf_points[2].y > position.y) {//4
 		rect2_coverage_testing_data_structure[13]++;
-		goto next2;
+		return true;
 	}
-
-	return false;
-
-next2:
-
-	if (xf_points[0].x > position.x) {
+	if (xf_points[3].y > position.y) {//5
 		rect2_coverage_testing_data_structure[14]++;
-		goto next3;
-	}
-	if (xf_points[1].x > position.x) {
-		rect2_coverage_testing_data_structure[15]++;
-		goto next3;
-	}
-	if (xf_points[2].x > position.x) {
+		return true;
+	}	
+	return false;
+}
+
+bool Rect2::_itrans_under_limit_y(Vector2 *xf_points) const { // 1
+	rect2_coverage_testing_data_structure[15]++;
+	real_t low_limit = position.y + size.y;
+
+	if (xf_points[0].y < low_limit) { // 2
 		rect2_coverage_testing_data_structure[16]++;
-		goto next3;
+		return true;
 	}
-	if (xf_points[3].x > position.x) {
+	if (xf_points[1].y < low_limit) { // 3
 		rect2_coverage_testing_data_structure[17]++;
-		goto next3;
+		return true;
 	}
-
-	return false;
-
-next3:
-
-	low_limit = position.x + size.x;
-
-	if (xf_points[0].x < low_limit) {
+	if (xf_points[2].y < low_limit) { // 4
 		rect2_coverage_testing_data_structure[18]++;
-		goto next4;
+		return true;
 	}
-	if (xf_points[1].x < low_limit) {
+	if (xf_points[3].y < low_limit) { // 5
 		rect2_coverage_testing_data_structure[19]++;
-		goto next4;
+		return true;
 	}
-	if (xf_points[2].x < low_limit) {
-		rect2_coverage_testing_data_structure[20]++;
-		goto next4;
-	}
-	if (xf_points[3].x < low_limit) {
-		rect2_coverage_testing_data_structure[21]++;
-		goto next4;
-	}
-
 	return false;
+}
 
-next4:
+bool Rect2::_itrans_over_limit_x(Vector2 *xf_points) const { // 1
+	rect2_coverage_testing_data_structure[20]++;
+	if (xf_points[0].x > position.x) {//2
+		rect2_coverage_testing_data_structure[21]++;
+		return true;
+	}
+	if (xf_points[1].x > position.x) {//3
+		rect2_coverage_testing_data_structure[22]++;
+		return true;
+	}
+	if (xf_points[2].x > position.x) {//4
+		rect2_coverage_testing_data_structure[23]++;
+		return true;
+	}
+	if (xf_points[3].x > position.x) {//5
+		rect2_coverage_testing_data_structure[24]++;
+		return true;
+	}
+	return false;
+}
 
+bool Rect2::_itrans_under_limit_x(Vector2 *xf_points) const { // 1
+	rect2_coverage_testing_data_structure[25]++;
+	real_t low_limit = position.x + size.x;
+
+	if (xf_points[0].x < low_limit) {//2
+		rect2_coverage_testing_data_structure[26]++;
+		return true;
+	}
+	if (xf_points[1].x < low_limit) {//3
+		rect2_coverage_testing_data_structure[27]++;
+		return true;
+	}
+	if (xf_points[2].x < low_limit) {//4
+		rect2_coverage_testing_data_structure[28]++;
+		return true;
+	}
+	if (xf_points[3].x < low_limit) {//5
+		rect2_coverage_testing_data_structure[29]++;
+		return true;
+	}
+	return false;
+}
+
+bool Rect2::_itrans_intersections(Vector2 *xf_points, const Transform2D &p_xform) const { //1
+	rect2_coverage_testing_data_structure[30]++;
 	Vector2 xf_points2[4] = {
 		position,
 		Vector2(position.x + size.x, position.y),
@@ -259,12 +236,12 @@ next4:
 	maxb = MAX(dp, maxb);
 	minb = MIN(dp, minb);
 
-	if (mina > maxb) {
-		rect2_coverage_testing_data_structure[22]++;
+	if (mina > maxb) {//2
+		rect2_coverage_testing_data_structure[31]++;
 		return false;
 	}
-	if (minb > maxa) {
-		rect2_coverage_testing_data_structure[23]++;
+	if (minb > maxa) {//3
+		rect2_coverage_testing_data_structure[32]++;
 		return false;
 	}
 
@@ -298,16 +275,62 @@ next4:
 	maxb = MAX(dp, maxb);
 	minb = MIN(dp, minb);
 
-	if (mina > maxb) {
-		rect2_coverage_testing_data_structure[24]++;
+	if (mina > maxb) {//4
+		rect2_coverage_testing_data_structure[33]++;
 		return false;
 	}
-	if (minb > maxa) {
-		rect2_coverage_testing_data_structure[25]++;
+	if (minb > maxa) {//5
+		rect2_coverage_testing_data_structure[34]++;
 		return false;
 	}
 
 	return true;
+}
+
+bool Rect2::intersects_transformed(const Transform2D &p_xform, const Rect2 &p_rect) const {//1
+	rect2_coverage_testing_data_structure[1]++;
+
+#ifdef MATH_CHECKS
+	if (unlikely(size.x < 0 || size.y < 0 || p_rect.size.x < 0 || p_rect.size.y < 0)) { //5
+		if (unlikely(size.x < 0)) rect2_coverage_testing_data_structure[2]++;
+		if (unlikely(size.y < 0)) rect2_coverage_testing_data_structure[3]++;
+		if (unlikely(p_rect.size.x < 0)) rect2_coverage_testing_data_structure[4]++;
+		if (unlikely(p_rect.size.x < 0)) rect2_coverage_testing_data_structure[5]++;
+		ERR_PRINT("Rect2 size is negative, this is not supported. Use Rect2.abs() to get a Rect2 with a positive size.");
+	}
+#endif
+	//SAT intersection between local and transformed rect2
+
+	Vector2 xf_points[4] = {
+		p_xform.xform(p_rect.position),
+		p_xform.xform(Vector2(p_rect.position.x + p_rect.size.x, p_rect.position.y)),
+		p_xform.xform(Vector2(p_rect.position.x, p_rect.position.y + p_rect.size.y)),
+		p_xform.xform(Vector2(p_rect.position.x + p_rect.size.x, p_rect.position.y + p_rect.size.y)),
+	};
+
+	//base rect2 first (faster)
+
+	if (!_itrans_over_limit_y(xf_points)) {
+		rect2_coverage_testing_data_structure[6]++;
+		return false;
+	} //6
+	
+	if (!_itrans_under_limit_x(xf_points)) {
+		rect2_coverage_testing_data_structure[7]++;
+		return false;
+	}; //7
+
+	if (!_itrans_over_limit_x(xf_points)) {
+		rect2_coverage_testing_data_structure[8]++;
+		return false;
+	} //8
+
+	if (!_itrans_under_limit_x(xf_points)) {
+		rect2_coverage_testing_data_structure[9]++;
+		return false;
+	} //9
+
+	return _itrans_intersections(xf_points, p_xform);
 }
 
 Rect2::operator String() const {
