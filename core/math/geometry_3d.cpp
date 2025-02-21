@@ -147,6 +147,8 @@ void Geometry3D::get_closest_points_between_segments(const Vector3 &p_p0, const 
 	r_qt = (1 - t) * p_q0 + t * p_q1;
 }
 
+//helper function for get_closest_distance_between_segments
+//limits the value to min if lower than min, max if higher than max and value/max if value is in between min and max.
 real_t Geometry3D::clamp(real_t val, real_t min, real_t max){
     if(val <= min) return min;
     else if(val >= max) return 1;
