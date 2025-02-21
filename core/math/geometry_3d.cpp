@@ -62,7 +62,6 @@ void Geometry3D::get_closest_points_between_segments(const Vector3 &p_p0, const 
 			if (e <= 0.0f) {
         geometry_3d_coverage_testing_data_structure[2]++;
 				// t <= 0.0f
-				//s = (-d >= a ? 1 : (-d > 0.0f ? -d / a : 0.0f));
         s = clamp(-d, 0.0f, a);
 				t = 0.0f;
 			} else if (e < c) {
@@ -72,7 +71,6 @@ void Geometry3D::get_closest_points_between_segments(const Vector3 &p_p0, const 
 				t = e / c;
 			} else {
 				// t >= 1
-				//s = (b - d >= a ? 1 : (b - d > 0.0f ? (b - d) / a : 0.0f));
         geometry_3d_coverage_testing_data_structure[4]++;
         s = clamp(b-d, 0.0f, a);
 				t = 1;
@@ -85,7 +83,6 @@ void Geometry3D::get_closest_points_between_segments(const Vector3 &p_p0, const 
 				// s >= 1
 				if (b + e <= 0.0f) {
 					// t <= 0.0f
-					//s = (-d <= 0.0f ? 0.0f : (-d < a ? -d / a : 1));
           s = clamp(-d, 0.0f, a);
           geometry_3d_coverage_testing_data_structure[6]++;
 					t = 0.0f;
@@ -97,7 +94,6 @@ void Geometry3D::get_closest_points_between_segments(const Vector3 &p_p0, const 
 				} else {
           geometry_3d_coverage_testing_data_structure[8]++;
 					// t >= 1
-					//s = (b - d <= 0.0f ? 0.0f : (b - d < a ? (b - d) / a : 1));
           s = clamp(b-d, 0.0f, a);
 					t = 1;
 				}
@@ -109,7 +105,6 @@ void Geometry3D::get_closest_points_between_segments(const Vector3 &p_p0, const 
 
 				if (ate <= btd) {
 					// t <= 0.0f
-					//s = (-d <= 0.0f ? 0.0f : (-d >= a ? 1 : -d / a));
           s = clamp(-d, 0.0f, a);
           geometry_3d_coverage_testing_data_structure[10]++;
 					t = 0.0f;
@@ -119,7 +114,6 @@ void Geometry3D::get_closest_points_between_segments(const Vector3 &p_p0, const 
 					t = ate - btd;
 					if (t >= det) {
 						// t >= 1
-						//s = (b - d <= 0.0f ? 0.0f : (b - d >= a ? 1 : (b - d) / a));
             geometry_3d_coverage_testing_data_structure[12]++;
             s = clamp(b - d, 0.0f, a);
 						t = 1;
@@ -135,12 +129,10 @@ void Geometry3D::get_closest_points_between_segments(const Vector3 &p_p0, const 
 	} else {
 		// Parallel segments
 		if (e <= 0.0f) {
-			//s = (-d <= 0.0f ? 0.0f : (-d >= a ? 1 : -d / a));
       geometry_3d_coverage_testing_data_structure[14]++;
       s = clamp(-d, 0.0f, a);
 			t = 0.0f;
 		} else if (e >= c) {
-			//s = (b - d <= 0.0f ? 0.0f : (b - d >= a ? 1 : (b - d) / a));
       geometry_3d_coverage_testing_data_structure[15]++;
       s = clamp(b - d, 0.0f, a);
 			t = 1;
@@ -155,6 +147,8 @@ void Geometry3D::get_closest_points_between_segments(const Vector3 &p_p0, const 
 	r_qt = (1 - t) * p_q0 + t * p_q1;
 }
 
+//helper function for get_closest_distance_between_segments
+//limits the value to min if lower than min, max if higher than max and value/max if value is in between min and max.
 real_t Geometry3D::clamp(real_t val, real_t min, real_t max){
     if(val <= min) return min;
     else if(val >= max) return 1;
