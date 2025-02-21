@@ -42,6 +42,42 @@ TEST_CASE("[Geometry3D] Closest Points Between Segments") {
 	CHECK(qt.is_equal_approx(Vector3(-1, -0.2, 0.2)));
 }
 
+/////////segments added by rifat//////
+TEST_CASE("[Geometry3D] Closest Points Between Segments") {
+	Vector3 ps, qt;
+	Geometry3D::get_closest_points_between_segments(Vector3(0, 0, 0), Vector3(0, 0, 1), Vector3(1, 0, 0), Vector3(1, 0, 1), ps, qt);
+    real_t x = ps.AXIS_X;
+    real_t y = ps.AXIS_X;
+    real_t z = ps.AXIS_X;
+    CHECK(x == 0);
+    CHECK(y == 0);
+    CHECK(z <= 1);
+    CHECK(0 <= z);
+	CHECK(qt.is_equal_approx(Vector3(1, 0, z)));
+}
+
+TEST_CASE("[Geometry3D] Closest Points Between Segments") {
+	Vector3 ps, qt;
+	Geometry3D::get_closest_points_between_segments(Vector3(0, 0, 0), Vector3(0, 0, 1), Vector3(-5, 0, 5), Vector3(5, 0, 5), ps, qt);
+	CHECK(ps.is_equal_approx(Vector3(0, 0, 1)));
+	CHECK(qt.is_equal_approx(Vector3(0, 0, 5)));
+}
+
+TEST_CASE("[Geometry3D] Closest Points Between Segments") {
+	Vector3 ps, qt;
+	Geometry3D::get_closest_points_between_segments(Vector3(0, 0, 0), Vector3(0, 0, 1), Vector3(-0.5, 0, 0), Vector3(0.5, 0, 0), ps, qt);
+	CHECK(ps.is_equal_approx(Vector3(0, 0, 0)));
+	CHECK(qt.is_equal_approx(Vector3(0, 0, 0)));
+}
+
+TEST_CASE("[Geometry3D] Closest Points Between Segments") {
+	Vector3 ps, qt;
+	Geometry3D::get_closest_points_between_segments(Vector3(0, 0, 0), Vector3(1, 0, 0), Vector3(0, 1, 0), Vector3(0, 2, 0), ps, qt);
+	CHECK(ps.is_equal_approx(Vector3(0, 0, 0)));
+	CHECK(qt.is_equal_approx(Vector3(0, 1, 0)));
+}
+///////////////////////////////////////
+
 TEST_CASE("[Geometry3D] Closest Distance Between Segments") {
 	CHECK(Geometry3D::get_closest_distance_between_segments(Vector3(1, -2, 0), Vector3(1, 2, 0), Vector3(-1, 2, 0), Vector3(-1, -2, 0)) == 2.0f);
 }
