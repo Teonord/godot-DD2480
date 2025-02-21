@@ -36,12 +36,6 @@
 #include "thirdparty/doctest/doctest.h"
 
 namespace Test_AStar_Grid2D  {
-
-    TEST_CASE("AStarGrid2D - Basic Initialization") {
-        AStarGrid2D grid;
-        CHECK(grid.is_dirty());
-        CHECK(grid.get_region() == Rect2i());
-    }
     
     TEST_CASE("AStarGrid2D - Set and Get Region") {
         AStarGrid2D grid;

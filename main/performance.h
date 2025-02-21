@@ -136,14 +136,15 @@ public:
 
 	Performance();
 
-private:
-    // Helper functions to split get_monitor()
+	// Helper functions to split get_monitor()
     double get_time_monitor(Monitor p_monitor) const;
     double get_memory_monitor(Monitor p_monitor) const;
     double get_object_monitor(Monitor p_monitor) const;
     double get_render_monitor(Monitor p_monitor) const;
     double get_physics_monitor(Monitor p_monitor) const;
     double get_navigation_monitor(Monitor p_monitor) const;
+
+private:
 
     // Helper functions to check monitor category
     bool is_time_monitor(Monitor p_monitor) const;
