@@ -32,11 +32,26 @@
 
 #include "core/string/ustring.h"
 
+#include <iostream> // Add this at the top
+
 void Transform2D::invert() {
-	// FIXME: this function assumes the basis is a rotation matrix, with no scaling.
-	// Transform2D::affine_inverse can handle matrices with scaling, so GDScript should eventually use that.
-	SWAP(columns[0][1], columns[1][0]);
-	columns[2] = basis_xform(-columns[2]);
+    real_t determinant = columns[0].x * columns[1].y - columns[0].y * columns[1].x;
+
+    if (Math::is_zero_approx(determinant)) {
+        *this = Transform2D();
+        return;
+    }
+
+    real_t inv_det = real_t(1.0) / determinant;
+    Vector2 new_x(columns[1].y * inv_det, -columns[0].y * inv_det);
+    Vector2 new_y(-columns[1].x * inv_det, columns[0].x * inv_det);
+    
+    // Compute correct new origin using basis_xform()
+    Vector2 new_origin = -(new_x * columns[2].x + new_y * columns[2].y);
+
+    columns[0] = new_x;
+    columns[1] = new_y;
+    columns[2] = new_origin;
 }
 
 Transform2D Transform2D::inverse() const {

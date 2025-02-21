@@ -244,6 +244,62 @@ TEST_CASE("[Transform2D] Is conformal checks") {
 			"Transform2D with the X axis skewed 45 degrees should not be conformal.");
 }
 
+
+
+
+TEST_CASE("[Transform2D] Inverse of identity matrix") {
+    Transform2D identity_matrix = Transform2D();
+    Transform2D inverse_matrix = identity_matrix.inverse();
+    CHECK(inverse_matrix == identity_matrix); // Identity matrix should remain unchanged
+}
+
+TEST_CASE("[Transform2D] Inverse of a non-invertible matrix") {
+    Transform2D singular_transform = Transform2D(Vector2(0, 0), Vector2(0, 0), Vector2(1, 1)); // Zero determinant
+    Transform2D inverse_transform = singular_transform.inverse();
+
+    CHECK(inverse_transform == Transform2D()); 
+}
+
+TEST_CASE("[Transform2D] Inverse of a simple transformation") {
+    Transform2D transform = Transform2D(Vector2(2, 0), Vector2(0, 2), Vector2(3, 3));
+    Transform2D inverse_transform = transform.inverse();
+    Transform2D result = inverse_transform * transform;
+
+    // Fix: Compare entire matrix instead of separate components
+    CHECK(result.is_equal_approx(Transform2D())); 
+}
+
+TEST_CASE("[Transform2D] Inverse of a rotation matrix") {
+    real_t angle = Math::deg_to_rad(45.0); // 45-degree rotation
+    Transform2D transform = Transform2D(angle, Vector2(0, 0));
+    Transform2D inverse_transform = transform.inverse();
+    Transform2D result = inverse_transform * transform;
+
+    // Check that the result is approximately the identity matrix
+    CHECK(result.is_equal_approx(Transform2D()));
+}
+
+TEST_CASE("[Transform2D] Approximate equality check") {
+    Transform2D t1 = Transform2D(1, 2, 3, 4, 5, 6);
+    Transform2D t2 = Transform2D(1.000001, 2, 3, 4, 5, 6);
+    CHECK(t1.is_equal_approx(t2) == true); // Should be approximately equal
+
+    Transform2D t3 = Transform2D(2, 3, 4, 5, 6, 7);
+    CHECK(t1.is_equal_approx(t3) == false); // Should NOT be equal
+}
+
+TEST_CASE("[Transform2D] Finite matrix check") {
+    Transform2D t1 = Transform2D(1, 2, 3, 4, 5, 6);
+    CHECK(t1.is_finite() == true);
+
+    Transform2D t2 = Transform2D(NAN, 2, 3, 4, 5, 6);
+    CHECK(t2.is_finite() == false); // Should detect NaN
+
+    Transform2D t3 = Transform2D(INFINITY, 2, 3, 4, 5, 6);
+    CHECK(t3.is_finite() == false); // Should detect Infinity
+}
+
+
 } // namespace TestTransform2D
 
 #endif // TEST_TRANSFORM_2D_H

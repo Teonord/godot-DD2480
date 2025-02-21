@@ -482,4 +482,60 @@ TEST_CASE("[AABB] Finite number checks") {
 
 } // namespace TestAABB
 
+
+
+
+
+TEST_CASE("[AABB] Intersection of two overlapping AABBs") {
+    AABB aabb1(Vector3(0, 0, 0), Vector3(5, 5, 5));
+    AABB aabb2(Vector3(3, 3, 3), Vector3(5, 5, 5));
+    AABB result = aabb1.intersection(aabb2);
+
+    CHECK(result.position == Vector3(3, 3, 3));
+    CHECK(result.size == Vector3(2, 2, 2));
+}
+
+TEST_CASE("[AABB] Intersection of two non-overlapping AABBs") {
+    AABB aabb1(Vector3(0, 0, 0), Vector3(5, 5, 5));
+    AABB aabb2(Vector3(10, 10, 10), Vector3(5, 5, 5));
+    AABB result = aabb1.intersection(aabb2);
+
+    CHECK(result == AABB()); // Should return an empty AABB
+}
+
+TEST_CASE("[AABB] One AABB fully inside another") {
+    AABB aabb1(Vector3(0, 0, 0), Vector3(10, 10, 10));
+    AABB aabb2(Vector3(3, 3, 3), Vector3(2, 2, 2));
+    AABB result = aabb1.intersection(aabb2);
+
+    CHECK(result == aabb2); // Should return the smaller AABB
+}
+
+TEST_CASE("[AABB] AABBs touching at an edge") {
+    AABB aabb1(Vector3(0, 0, 0), Vector3(5, 5, 5));
+    AABB aabb2(Vector3(5, 0, 0), Vector3(5, 5, 5));
+    AABB result = aabb1.intersection(aabb2);
+
+    CHECK(result == AABB(Vector3(5, 0, 0), Vector3(0, 5, 5))); // Edge touching
+}
+
+TEST_CASE("[AABB] Intersection with floating-point precision issues") {
+    AABB aabb1(Vector3(0.000001, 0.000001, 0.000001), Vector3(5, 5, 5));
+    AABB aabb2(Vector3(3.000001, 3.000001, 3.000001), Vector3(5, 5, 5));
+    AABB result = aabb1.intersection(aabb2);
+
+    CHECK(result.position.is_equal_approx(Vector3(3.000001, 3.000001, 3.000001)));
+    CHECK(result.size.is_equal_approx(Vector3(1.999999, 1.999999, 1.999999)));
+}
+
+TEST_CASE("[AABB] Intersection with negative coordinates") {
+    AABB aabb1(Vector3(-10, -10, -10), Vector3(10, 10, 10));
+    AABB aabb2(Vector3(-5, -5, -5), Vector3(5, 5, 5));
+    AABB result = aabb1.intersection(aabb2);
+
+    CHECK(result == AABB(Vector3(-5, -5, -5), Vector3(5, 5, 5)));
+}
+
+
+
 #endif // TEST_AABB_H

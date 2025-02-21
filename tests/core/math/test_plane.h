@@ -32,6 +32,7 @@
 #define TEST_PLANE_H
 
 #include "core/math/plane.h"
+#include "tests/test_macros.h"
 
 #include "thirdparty/doctest/doctest.h"
 
@@ -189,6 +190,56 @@ TEST_CASE("[Plane] Finite number checks") {
 			Plane(infinite_vec, infinite_y).is_finite(),
 			"Plane with two components infinite should not be finite.");
 }
+
+
+
+TEST_CASE("[Plane] Intersect 3 - Perpendicular Planes") {
+    Plane p1(Vector3(1, 0, 0), 0); // x = 0
+    Plane p2(Vector3(0, 1, 0), 0); // y = 0
+    Plane p3(Vector3(0, 0, 1), 0); // z = 0
+
+    Vector3 intersection;
+    bool result = p1.intersect_3(p2, p3, &intersection);
+
+    CHECK(result == true);
+    CHECK(intersection.is_equal_approx(Vector3(0, 0, 0)));
+}
+
+TEST_CASE("[Plane] Intersect 3 - Parallel Planes (No Intersection)") {
+    Plane p1(Vector3(1, 0, 0), 1); // x = 1
+    Plane p2(Vector3(1, 0, 0), 2); // x = 2 (parallel)
+    Plane p3(Vector3(0, 1, 0), 0); // y = 0
+
+    Vector3 intersection;
+    bool result = p1.intersect_3(p2, p3, &intersection);
+
+    CHECK(result == false); // No intersection expected
+}
+
+TEST_CASE("[Plane] Intersect 3 - Coincident Planes (Infinite Solutions)") {
+    Plane p1(Vector3(1, 1, 0), 1); // x + y = 1
+    Plane p2(Vector3(2, 2, 0), 2); // 2x + 2y = 2 (same as above)
+    Plane p3(Vector3(0, 0, 1), 0); // z = 0
+
+    Vector3 intersection;
+    bool result = p1.intersect_3(p2, p3, &intersection);
+
+    CHECK(result == false); // Infinite solutions, no unique intersection
+}
+
+TEST_CASE("[Plane] Intersect 3 - Floating Point Precision") {
+    Plane p1(Vector3(1.000001, 0, 0), 0); // Slightly off x = 0
+    Plane p2(Vector3(0, 1.000001, 0), 0); // Slightly off y = 0
+    Plane p3(Vector3(0, 0, 1.000001), 0); // Slightly off z = 0
+
+    Vector3 intersection;
+    bool result = p1.intersect_3(p2, p3, &intersection);
+
+    CHECK(result == true);
+    CHECK(intersection.is_equal_approx(Vector3(0, 0, 0))); // Should still be close to (0,0,0)
+}
+
+
 
 } // namespace TestPlane
 

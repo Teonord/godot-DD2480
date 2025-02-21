@@ -226,6 +226,46 @@ TEST_CASE("[Color] Manipulation methods") {
 			red.lerp(yellow, 0.5).is_equal_approx(Color(1, 0.5, 0, 0.5)),
 			"Red interpolated with yellow should be orange (with interpolated alpha).");
 }
+
+
+
+TEST_CASE("[Color] Blend - Fully Opaque Overlays") {
+    Color base(0.2, 0.4, 0.6, 1.0);   // Base color
+    Color overlay(0.8, 0.2, 0.0, 1.0); // Fully opaque overlay
+
+    Color result = base.blend(overlay);
+    
+    CHECK(result.is_equal_approx(overlay)); // Overlay should completely replace base
+}
+
+TEST_CASE("[Color] Blend - Fully Transparent Overlays") {
+    Color base(0.2, 0.4, 0.6, 1.0);
+    Color overlay(0.8, 0.2, 0.0, 0.0); // Fully transparent overlay
+
+    Color result = base.blend(overlay);
+
+    CHECK(result.is_equal_approx(base)); // Should be unchanged
+}
+
+TEST_CASE("[Color] Blend - Edge Case (Alpha = 1, Same Color)") {
+    Color base(0.5, 0.5, 0.5, 1.0);
+    Color overlay(0.5, 0.5, 0.5, 1.0);
+
+    Color result = base.blend(overlay);
+
+    CHECK(result.is_equal_approx(overlay)); // Should be the same as overlay
+}
+
+TEST_CASE("[Color] Blend - Edge Case (Alpha = 0, Same Color)") {
+    Color base(0.5, 0.5, 0.5, 1.0);
+    Color overlay(0.5, 0.5, 0.5, 0.0);
+
+    Color result = base.blend(overlay);
+
+    CHECK(result.is_equal_approx(base)); // Should remain unchanged
+}
+
+
 } // namespace TestColor
 
 #endif // TEST_COLOR_H
