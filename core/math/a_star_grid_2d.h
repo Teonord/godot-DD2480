@@ -34,6 +34,8 @@
 #include "core/object/gdvirtual.gen.inc"
 #include "core/object/ref_counted.h"
 #include "core/templates/local_vector.h"
+#include "core/math/vector2.h"
+#include "core/math/rect2.h"
 
 class AStarGrid2D : public RefCounted {
 	GDCLASS(AStarGrid2D, RefCounted);
