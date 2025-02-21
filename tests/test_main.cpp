@@ -272,6 +272,7 @@ int test_main(int argc, char *argv[]) {
 
 	print_coverage_testing_data_structure(rect2_coverage_testing_data_structure);
 	print_coverage_testing_data_structure(basis_coverage_testing_data_structure);
+    print_coverage_testing_data_structure(geometry_3d_coverage_testing_data_structure);
 
 	return res;
 }

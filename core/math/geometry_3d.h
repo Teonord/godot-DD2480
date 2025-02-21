@@ -37,6 +37,8 @@
 #include "core/templates/local_vector.h"
 #include "core/templates/vector.h"
 
+extern int geometry_3d_coverage_testing_data_structure[100];
+
 class Geometry3D {
 private:
     static real_t clamp(real_t val, real_t min, real_t max);
