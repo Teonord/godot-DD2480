@@ -40,6 +40,8 @@
 extern int geometry_3d_coverage_testing_data_structure[100];
 
 class Geometry3D {
+private:
+    static real_t clamp(real_t val, real_t min, real_t max);
 
 public:
 	static void get_closest_points_between_segments(const Vector3 &p_p0, const Vector3 &p_p1, const Vector3 &p_q0, const Vector3 &p_q1, Vector3 &r_ps, Vector3 &r_qt);
